@@ -1,0 +1,538 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+SCHENGEN TRAVEL ASSISTANT - COMPREHENSIVE TRAVEL PLANNING PLATFORM
+
+================================================================================
+
+DOCUMENT INFORMATION
+- Version: 1.0
+- Date: July 2025
+- Author: Product Team
+- Status: Draft
+
+================================================================================
+
+1. EXECUTIVE SUMMARY
+
+1.1 Product Vision
+Create the world's most comprehensive Schengen Area travel planning platform that helps travelers navigate the complex 90/180 day rule while generating £5,000+ monthly revenue through strategic monetization.
+
+1.2 Product Mission
+Empower travelers with accurate Schengen compliance tracking, intelligent travel planning, and seamless booking experiences while building a sustainable, profitable travel business.
+
+1.3 Success Metrics
+- Revenue Target: £5,000+ monthly within 18 months
+- User Acquisition: 50,000+ monthly active users
+- Conversion Rate: 3-5% affiliate click-through rate
+- User Retention: 40% monthly active user retention
+- Content Performance: 100,000+ monthly pageviews for SEO content
+
+================================================================================
+
+2. MARKET OPPORTUNITY
+
+2.1 Market Size
+- Global travel apps revenue: $629 billion (2023)
+- Schengen Area: 400+ million annual visitors
+- Target audience: Visa-free travelers from 60+ countries
+- Digital nomads and frequent travelers: Growing 50% annually
+
+2.2 User Pain Points
+- Complex 90/180 day rule calculations
+- Fragmented travel planning across multiple platforms
+- Lack of real-time visa requirement information
+- Difficulty optimizing travel within legal limits
+- No integrated solution for compliance + booking
+
+2.3 Competitive Landscape
+- Direct competitors: Limited Schengen calculators (basic tools only)
+- Indirect competitors: TripAdvisor, Kayak, Expedia (lacking Schengen focus)
+- Opportunity: First comprehensive Schengen-focused platform
+
+================================================================================
+
+3. PRODUCT STRATEGY
+
+3.1 Core Value Proposition
+"The only platform you need to stay Schengen-compliant while planning amazing European adventures"
+
+3.2 Target Personas
+
+Primary Persona: Digital Nomad Dan
+- Age: 28-35
+- Income: £40-80k
+- Behavior: Travels 6+ months/year, tech-savvy
+- Pain: Constantly worried about overstaying Schengen limits
+- Goal: Maximize time in Europe while staying compliant
+
+Secondary Persona: Leisure Traveler Lisa
+- Age: 35-55
+- Income: £50-100k
+- Behavior: Takes 2-3 European trips annually
+- Pain: Confused by visa rules, wants simple planning
+- Goal: Stress-free European vacations
+
+Tertiary Persona: Business Traveler Ben
+- Age: 30-50
+- Income: £60-120k
+- Behavior: Frequent EU business trips + leisure travel
+- Pain: Mixing business and personal travel compliance
+- Goal: Efficient travel planning without legal issues
+
+================================================================================
+
+4. PRODUCT FEATURES
+
+4.1 Core Features (MVP)
+
+4.1.1 Smart Schengen Calculator
+User Story: As a traveler, I want to accurately track my Schengen days so I don't accidentally overstay.
+
+Acceptance Criteria:
+- Support multiple trip entries with country, start/end dates
+- Real-time calculation of 90/180 rolling window
+- Visual status dashboard showing days used/remaining
+- Automated alerts for approaching limits
+- Export functionality for compliance documentation
+- Mobile-responsive interface
+
+Technical Requirements:
+- Date validation and error handling
+- Complex rolling window calculations
+- Data persistence (local storage for non-registered users)
+- Export to PDF/text formats
+
+4.1.2 AI-Powered Travel Planning Assistant
+User Story: As a traveler, I want personalized destination recommendations based on my remaining Schengen days.
+
+Acceptance Criteria:
+- Nationality-based visa-free destination suggestions
+- Optimal itinerary planning within legal limits
+- Real-time integration of travel restrictions
+- Multi-country trip optimization
+- Seasonal and budget-based recommendations
+
+Technical Requirements:
+- AI/ML recommendation engine
+- Real-time government data API integration
+- Geolocation and mapping services
+- Weather and seasonal data feeds
+
+4.1.3 Expert Consultation Marketplace
+User Story: As a traveler with complex needs, I want access to certified travel experts.
+
+Acceptance Criteria:
+- Vetted consultant profiles and specializations
+- Integrated booking and payment system
+- Session scheduling and video conferencing
+- Review and rating system
+- Commission tracking (20-30% platform fee)
+
+Technical Requirements:
+- Payment processing (Stripe integration)
+- Video conferencing API (Zoom/Teams)
+- User authentication and profiles
+- Commission calculation system
+
+4.2 Non-Authenticated Features
+
+4.2.1 Comprehensive Country Database
+- Visa requirements by nationality
+- Entry restrictions and COVID policies
+- Embassy contact information
+- Cultural guides and local information
+- Currency and language data
+
+4.2.2 Travel Planning Tools
+- Trip suggestion engine
+- Budget estimation calculator
+- Weather comparison tool
+- Currency converter
+- Seasonal travel recommendations
+
+4.2.3 Educational Content Hub
+- "How the 90/180 rule works" guide
+- Digital nomad compliance strategies
+- Country comparison articles
+- Common mistakes and solutions
+- Travel tips and cultural guides
+
+4.2.4 Interactive Tools
+- Quick destination checker
+- Travel timeline optimizer
+- Passport strength analyzer
+- Travel personality quiz
+- Group travel coordinator
+
+4.2.5 Real-time Information Feeds
+- Travel alerts and restrictions
+- Flight deal notifications
+- Currency fluctuation alerts
+- Weather updates
+- Festival and event calendars
+
+4.2.6 Comparison & Research Tools
+- Destination comparison engine
+- Flight price comparison
+- Accommodation cost analysis
+- Transportation options
+- Safety and healthcare information
+
+4.2.7 Community Features
+- User-generated destination reviews
+- Travel inspiration stories
+- Local insider tips
+- Transportation reviews
+- Photo galleries and experiences
+
+4.2.8 Interactive Maps & Visualizations
+- Schengen area interactive map
+- Route planning visualization
+- Popular destination heatmaps
+- Transportation network maps
+- Historical travel patterns
+
+4.2.9 Travel Document Helpers
+- Passport validity checker
+- Travel insurance requirements
+- Vaccination requirement checker
+- Customs and duty allowances
+- Emergency contact compilation
+
+4.3 Premium Features (Post-Authentication)
+
+4.3.1 Advanced Trip Planning
+- Unlimited trip entries and history
+- Advanced analytics and insights
+- Multi-traveler family/group planning
+- Calendar integration and sync
+- Priority customer support
+
+4.3.2 Personalization Engine
+- AI-powered personalized recommendations
+- Custom alerts and notifications
+- Saved preferences and favorites
+- Travel goal tracking
+- Loyalty program integration
+
+4.3.3 Professional Services
+- One-on-one travel consultation
+- Custom itinerary creation
+- Visa application assistance
+- Travel document review
+- Emergency travel support
+
+================================================================================
+
+5. MONETIZATION STRATEGY
+
+5.1 Revenue Streams
+
+5.1.1 Affiliate Commissions (Primary)
+Target: £3,000/month (60% of revenue)
+
+Partners & Commission Rates:
+- Flights: Skyscanner (20%), Travelpayouts (1-3%)
+- Hotels: Booking.com (4%), Expedia (3-5%)
+- Tours: Viator (8%), GetYourGuide (6-8%)
+- Insurance: World Nomads (5-10%), SafetyWing (8-12%)
+- Visas: iVisa (10-15%)
+
+Implementation:
+- Strategic placement at decision-making moments
+- Native integration with travel planning tools
+- Contextual recommendations based on user journey
+- A/B testing for optimal conversion rates
+
+5.1.2 Premium Subscriptions (Secondary)
+Target: £1,500/month (30% of revenue)
+
+Pricing Tiers:
+- Basic: Free (calculator + limited features)
+- Pro: £10/month (unlimited planning + premium tools)
+- Expert: £25/month (Pro + consultation credits)
+
+Premium Features:
+- Unlimited trip planning and history
+- Advanced AI recommendations
+- Priority customer support
+- Expert consultation credits
+- Calendar integration
+- Group planning tools
+
+5.1.3 Expert Consultation Marketplace (Tertiary)
+Target: £500/month (10% of revenue)
+
+Model: 20-30% commission on £100-500 consultation sessions
+Volume: 10-15 sessions/month to reach target
+Services: Custom itinerary planning, visa assistance, emergency support
+
+5.2 Revenue Progression
+- Months 1-6: Focus on affiliate integration and content creation
+- Months 7-12: Launch premium subscriptions
+- Months 13-18: Scale expert marketplace and enterprise features
+
+================================================================================
+
+6. TECHNICAL REQUIREMENTS
+
+6.1 Frontend Architecture
+- Framework: React.js with TypeScript
+- Styling: Tailwind CSS for responsive design
+- State Management: Redux for complex state
+- Maps: Google Maps API for visualizations
+- Charts: Chart.js for analytics dashboards
+
+6.2 Backend Architecture
+- Runtime: Node.js with Express
+- Database: PostgreSQL for relational data, Redis for caching
+- Authentication: Auth0 for user management
+- Payments: Stripe for subscription and marketplace payments
+- APIs: RESTful architecture with GraphQL for complex queries
+
+6.3 Third-Party Integrations
+- Travel Data: Amadeus API, Skyscanner API
+- Government Data: Official embassy APIs, travel advisory feeds
+- Weather: OpenWeatherMap API
+- Currency: ExchangeRate-API
+- Email: SendGrid for transactional emails
+- Analytics: Google Analytics, Mixpanel for user behavior
+
+6.4 Infrastructure
+- Hosting: AWS with auto-scaling
+- CDN: CloudFront for global content delivery
+- Monitoring: Datadog for application monitoring
+- Backup: Automated daily backups with 30-day retention
+
+6.5 Security & Compliance
+- Data Protection: GDPR compliance with explicit consent
+- Payment Security: PCI DSS compliance via Stripe
+- SSL: End-to-end encryption for all user data
+- Privacy: Cookie consent management
+- Legal: Terms of service limiting liability for third-party advice
+
+================================================================================
+
+7. USER EXPERIENCE DESIGN
+
+7.1 Design Principles
+- Simplicity: Complex calculations made simple
+- Trust: Professional design inspiring confidence
+- Speed: Fast loading and responsive interactions
+- Mobile-First: Optimized for travel planning on-the-go
+
+7.2 Key User Flows
+
+7.2.1 New User Onboarding
+1. Landing page with value proposition
+2. Quick nationality selection
+3. Demo calculator with sample data
+4. Clear call-to-action for registration
+5. Email capture for travel tips newsletter
+
+7.2.2 Trip Planning Flow
+1. Enter travel dates and destinations
+2. Real-time compliance checking
+3. Receive personalized recommendations
+4. Compare options with integrated tools
+5. Book through affiliate partners
+6. Save trip to personal dashboard
+
+7.2.3 Expert Consultation Flow
+1. Identify need for expert help
+2. Browse consultant profiles
+3. Schedule consultation session
+4. Complete payment through platform
+5. Receive session confirmation
+6. Post-session review and rating
+
+7.3 Mobile Optimization
+- Progressive Web App (PWA) capabilities
+- Offline functionality for saved trips
+- Touch-optimized interface elements
+- Quick actions for frequent tasks
+- Push notifications for travel alerts
+
+================================================================================
+
+8. CONTENT STRATEGY
+
+8.1 SEO Content Hub
+Goal: 100,000+ monthly pageviews driving affiliate revenue
+
+Content Types:
+- Country Guides: "Complete Guide to [Country] for [Nationality]"
+- Comparison Articles: "Best Schengen Countries for Digital Nomads"
+- How-To Guides: "How to Maximize Your 90 Days in Europe"
+- Seasonal Content: "Best European Destinations for Winter 2025"
+- Tool Pages: Interactive calculators and comparison tools
+
+Content Schedule:
+- 20 new articles/month (AI-assisted creation)
+- Weekly destination spotlights
+- Monthly policy update summaries
+- Seasonal travel trend analyses
+
+8.2 Content Distribution
+- Blog: Primary SEO content hub
+- Email Newsletter: Weekly travel tips and deal alerts
+- Social Media: Instagram/TikTok for travel inspiration
+- YouTube: Tutorial videos and destination guides
+- Partnerships: Guest posts on travel blogs
+
+================================================================================
+
+9. MARKETING & ACQUISITION STRATEGY
+
+9.1 Acquisition Channels
+
+9.1.1 Organic Search (Primary)
+- Target keywords: "schengen calculator", "90 180 rule", "europe travel planner"
+- Content marketing for travel-related long-tail keywords
+- Local SEO for country-specific searches
+
+9.1.2 Social Media (Secondary)
+- Instagram: Travel inspiration and tips
+- TikTok: Quick travel hacks and destination highlights
+- YouTube: Detailed travel planning tutorials
+- Facebook: Community building and travel groups
+
+9.1.3 Partnerships (Tertiary)
+- Travel blogger collaborations
+- Digital nomad community partnerships
+- Embassy and tourism board relationships
+- Integration with existing travel platforms
+
+9.2 Retention Strategy
+- Email Marketing: Personalized travel alerts and recommendations
+- Push Notifications: Important policy updates and trip reminders
+- Loyalty Program: Rewards for successful bookings and referrals
+- Community Building: User-generated content and travel stories
+
+================================================================================
+
+10. ANALYTICS & KPIs
+
+10.1 Business Metrics
+- Monthly Recurring Revenue (MRR)
+- Customer Acquisition Cost (CAC)
+- Customer Lifetime Value (CLV)
+- Affiliate conversion rates by partner
+- Average order value for bookings
+
+10.2 Product Metrics
+- Daily/Monthly Active Users
+- Feature adoption rates
+- User journey completion rates
+- Customer satisfaction scores
+- Support ticket volume and resolution time
+
+10.3 Content Metrics
+- Organic search traffic growth
+- Content engagement rates
+- Social media follower growth
+- Email newsletter open/click rates
+- Video view rates and retention
+
+================================================================================
+
+11. RISK MANAGEMENT
+
+11.1 Technical Risks
+- Data Accuracy: Partner with official government sources
+- Scalability: Design for high traffic from launch
+- Security: Regular security audits and penetration testing
+- Third-Party Dependencies: Maintain backup data sources
+
+11.2 Business Risks
+- Regulatory Changes: Monitor policy updates closely
+- Competition: Focus on unique value proposition
+- Affiliate Program Changes: Diversify partner portfolio
+- Economic Downturns: Build recession-resistant features
+
+11.3 Legal & Compliance
+- GDPR Compliance: Privacy by design approach
+- Immigration Advice: Clear disclaimers and expert partnerships
+- Affiliate Disclosures: Transparent affiliate link labeling
+- Tax Compliance: Proper VAT handling for different jurisdictions
+
+================================================================================
+
+12. LAUNCH STRATEGY
+
+12.1 Pre-Launch (Months 1-3)
+- MVP development and testing
+- Content creation for SEO foundation
+- Affiliate partnership establishment
+- Beta user recruitment and feedback
+
+12.2 Soft Launch (Months 4-6)
+- Limited release to travel communities
+- User feedback collection and iteration
+- Content marketing campaign initiation
+- Influencer partnerships
+
+12.3 Full Launch (Months 7-9)
+- Public release with PR campaign
+- Paid advertising campaigns
+- Feature expansion based on user data
+- Premium subscription launch
+
+12.4 Scale Phase (Months 10-18)
+- Expert marketplace launch
+- Mobile app development
+- International market expansion
+- Enterprise features for travel agencies
+
+================================================================================
+
+13. SUCCESS TIMELINE
+
+Year 1 Milestones
+- Month 3: MVP launch with core calculator
+- Month 6: 10,000 monthly users, £500/month revenue
+- Month 9: Premium features launch, 25,000 monthly users
+- Month 12: £2,500/month revenue, expert marketplace launch
+
+Year 2 Goals
+- Month 18: £5,000+/month revenue target achieved
+- Month 24: Mobile app launch, 100,000+ monthly users
+- International expansion to additional markets
+- Enterprise partnerships with travel agencies
+
+================================================================================
+
+14. RESOURCE REQUIREMENTS
+
+14.1 Development Team
+- 1 Full-stack Developer (Cursor AI-assisted development)
+- 1 Part-time Designer (UI/UX and marketing materials)
+- 1 Part-time Content Creator (SEO content and social media)
+
+14.2 Technology Stack Investment
+- Development Tools: Cursor Pro subscription (£20/month)
+- Infrastructure: AWS hosting (£200-500/month scaling)
+- Third-Party APIs: £500-1000/month for data feeds
+- Marketing Tools: £300-500/month for analytics and email
+
+14.3 Legal & Compliance
+- Legal Consultation: £2,000-5,000 for initial setup
+- Ongoing Compliance: £1,000/month for legal reviews
+- Insurance: Professional indemnity coverage
+
+================================================================================
+
+15. CONCLUSION
+
+The Schengen Travel Assistant represents a significant market opportunity at the intersection of complex travel regulations and growing digital nomad/frequent traveler populations. By combining accurate compliance tracking with intelligent travel planning and strategic monetization, this platform can realistically achieve £5,000+ monthly revenue within 18 months.
+
+The key to success lies in:
+1. Building trust through accurate, reliable information
+2. Creating value at every step of the travel planning journey
+3. Strategic monetization that enhances rather than detracts from user experience
+4. Continuous iteration based on user feedback and market changes
+
+With the right execution of this PRD, the platform can become the definitive resource for Schengen area travel planning while building a sustainable, profitable business.
+
+================================================================================
+
+END OF DOCUMENT 
