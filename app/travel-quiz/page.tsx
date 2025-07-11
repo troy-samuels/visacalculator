@@ -265,7 +265,7 @@ export default function TravelQuiz() {
   }
 
   const shareResults = () => {
-    if (navigator.share) {
+    if (typeof window !== 'undefined' && navigator.share) {
       navigator.share({
         title: 'My European Travel Personality',
         text: `I'm ${personalityTypes[personalityType as keyof typeof personalityTypes]?.title}! What's your European travel personality?`,

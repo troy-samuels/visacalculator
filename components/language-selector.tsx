@@ -126,8 +126,11 @@ export function useLanguage() {
   const [currentLanguage, setCurrentLanguage] = useState<string>("en")
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferredLanguage") || "en"
-    setCurrentLanguage(savedLanguage)
+    // Only access localStorage on client-side
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem("preferredLanguage") || "en"
+      setCurrentLanguage(savedLanguage)
+    }
   }, [])
 
   return currentLanguage
