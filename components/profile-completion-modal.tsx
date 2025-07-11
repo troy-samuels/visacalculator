@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { X } from "lucide-react"
-import type { Profile, Country } from "@/lib/types/database"
+import type { Profile } from "@/lib/types/database"
 
 interface ProfileCompletionModalProps {
-  profile: Profile
-  countries: Country[]
+  isOpen: boolean
+  onClose: () => void
   onComplete: (updatedProfile: Partial<Profile>) => Promise<void>
-  onSkip: () => void
+  currentProfile: Profile | null
 }
 
 const travelReasons = [
@@ -23,14 +23,32 @@ const travelReasons = [
   { value: "student", label: "Student" },
 ]
 
-export function ProfileCompletionModal({ profile, countries, onComplete, onSkip }: ProfileCompletionModalProps) {
+// Default countries for the modal
+const defaultCountries = [
+  { code: "US", name: "United States", flag: "🇺🇸" },
+  { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
+  { code: "CA", name: "Canada", flag: "🇨🇦" },
+  { code: "AU", name: "Australia", flag: "🇦🇺" },
+  { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
+  { code: "JP", name: "Japan", flag: "🇯🇵" },
+  { code: "SG", name: "Singapore", flag: "🇸🇬" },
+  { code: "BR", name: "Brazil", flag: "🇧🇷" },
+  { code: "MX", name: "Mexico", flag: "🇲🇽" },
+  { code: "IN", name: "India", flag: "🇮🇳" },
+  { code: "ZA", name: "South Africa", flag: "🇿🇦" },
+  { code: "AE", name: "United Arab Emirates", flag: "🇦🇪" },
+]
+
+export function ProfileCompletionModal({ isOpen, onClose, onComplete, currentProfile }: ProfileCompletionModalProps) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    first_name: profile.first_name || "",
-    last_name: profile.last_name || "",
-    home_country: profile.home_country || "",
-    travel_reason: profile.travel_reason || "",
+    first_name: currentProfile?.first_name || "",
+    last_name: currentProfile?.last_name || "",
+    home_country: currentProfile?.home_country || "",
+    travel_reason: currentProfile?.travel_reason || "",
   })
+
+  if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,7 +75,7 @@ export function ProfileCompletionModal({ profile, countries, onComplete, onSkip 
       <div className="bg-white rounded-2xl shadow-2xl border border-white/20 p-8 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Complete Your Profile</h2>
-          <Button variant="ghost" size="sm" onClick={onSkip} className="p-2 hover:bg-gray-100 rounded-full">
+          <Button variant="ghost" size="sm" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
             <X className="w-5 h-5 text-gray-600" />
           </Button>
         </div>
@@ -95,7 +113,7 @@ export function ProfileCompletionModal({ profile, countries, onComplete, onSkip 
                 <SelectValue placeholder="Select your home country" />
               </SelectTrigger>
               <SelectContent>
-                {countries.map((country) => (
+                {defaultCountries.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
                     <div className="flex items-center space-x-2">
                       <span className="text-lg">{country.flag}</span>
@@ -138,7 +156,7 @@ export function ProfileCompletionModal({ profile, countries, onComplete, onSkip 
           <Button
             type="button"
             variant="outline"
-            onClick={onSkip}
+            onClick={onClose}
             className="w-full h-12 font-medium rounded-xl border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
           >
             Skip for now

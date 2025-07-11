@@ -13,6 +13,7 @@ import { format, differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
 import { useAuth } from "@/lib/hooks/useAuth"
+import { useAdminAuth } from "@/lib/hooks/useAdminAuth"
 import { createClient } from "@/lib/supabase/client"
 import { ProfileCompletionModal } from "@/components/profile-completion-modal"
 import type { Profile } from "@/lib/types/database"
@@ -174,6 +175,7 @@ function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; 
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading, signOut } = useAuth()
+  const { adminUser, loading: adminLoading, adminSignOut } = useAdminAuth()
   const router = useRouter()
   const supabase = createClient()
 
@@ -186,26 +188,38 @@ export default function DashboardPage() {
   const [calculator] = useState(() => new SchengenCalculator())
   const [dataCapture] = useState(() => new DataCaptureService())
 
+  // Check authentication (both regular and admin)
+  const isAuthenticated = !!(user || adminUser)
+  const isLoading = authLoading || adminLoading
+  const currentUser = adminUser || user
+  const isAdmin = !!adminUser
+
   // Redirect if not authenticated
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isLoading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [user, authLoading, router])
+  }, [isAuthenticated, isLoading, router])
 
   // Load data when user is available
   useEffect(() => {
-    if (user && profile) {
-      loadUserData()
+    if (isAuthenticated) {
+      if (isAdmin) {
+        // Load sample data for admin
+        loadAdminData()
+      } else if (user && profile) {
+        // Load real user data from Supabase
+        loadUserData()
+      }
     }
-  }, [user, profile])
+  }, [user, profile, adminUser, isAuthenticated, isAdmin])
 
-  // Check if profile needs completion
+  // Check if profile needs completion (only for regular users)
   useEffect(() => {
-    if (profile && !profile.profile_completed) {
+    if (!isAdmin && profile && !profile.profile_completed) {
       setShowProfileModal(true)
     }
-  }, [profile])
+  }, [profile, isAdmin])
 
   // Recalculate whenever entries change
   useEffect(() => {
@@ -299,6 +313,48 @@ export default function DashboardPage() {
         }
       })
     })
+  }
+
+  const loadAdminData = () => {
+    // Load sample data for admin demonstration
+    const sampleEntries: VisaEntryLocal[] = [
+      {
+        id: "admin-sample-1",
+        country: "FR", // France
+        startDate: subDays(new Date(), 45), // 45 days ago
+        endDate: subDays(new Date(), 30),   // 30 days ago (15-day trip)
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      },
+      {
+        id: "admin-sample-2",
+        country: "DE", // Germany
+        startDate: subDays(new Date(), 90), // 90 days ago
+        endDate: subDays(new Date(), 75),   // 75 days ago (15-day trip)
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      },
+      {
+        id: "admin-sample-3",
+        country: "ES", // Spain
+        startDate: subDays(new Date(), 20), // 20 days ago
+        endDate: subDays(new Date(), 10),   // 10 days ago (10-day trip)
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      }
+    ]
+    
+    setEntries(sampleEntries)
+    setLoading(false)
   }
 
   const loadUserData = async () => {
@@ -398,7 +454,8 @@ export default function DashboardPage() {
   }
 
   const saveEntry = async (entry: VisaEntryLocal) => {
-    if (!user || !entry.startDate || !entry.endDate || !entry.country) return
+    // Skip saving for admin users (no database access needed)
+    if (isAdmin || !user || !entry.startDate || !entry.endDate || !entry.country) return
 
     try {
       const { error } = await supabase.from("visa_entries").upsert({
@@ -488,6 +545,12 @@ export default function DashboardPage() {
   }
 
   const handleProfileComplete = async (updatedProfile: Partial<Profile>) => {
+    // Skip profile updates for admin users
+    if (isAdmin) {
+      setShowProfileModal(false)
+      return
+    }
+
     try {
       const { error } = await supabase
         .from("profiles")
@@ -542,7 +605,7 @@ export default function DashboardPage() {
   const totalDaysInLast180 = calculationResult?.daysUsed || 0
   const totalDaysRemaining = calculationResult?.daysRemaining || 90
 
-  if (authLoading || loading) {
+  if (authLoading || adminLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="text-center">
@@ -553,8 +616,26 @@ export default function DashboardPage() {
     )
   }
 
-  if (!user) {
-    return null
+  const handleSignOut = () => {
+    if (isAdmin) {
+      adminSignOut()
+      router.push("/")
+    } else {
+      signOut()
+    }
+  }
+
+  const getUserDisplayName = () => {
+    if (isAdmin && adminUser) {
+      return `Admin: ${adminUser.name}`
+    }
+    if (profile?.first_name) {
+      return `Hello, ${profile.first_name}`
+    }
+    if (user?.email) {
+      return user.email
+    }
+    return "User"
   }
 
   return (
@@ -563,15 +644,20 @@ export default function DashboardPage() {
       <header className="shadow-sm border-b border-gray-200" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
               <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+              {isAdmin && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                  🔐 Admin Mode
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                {profile?.first_name ? `Hello, ${profile.first_name}` : user.email}
+                {getUserDisplayName()}
               </span>
               <Button
-                onClick={signOut}
+                onClick={handleSignOut}
                 variant="outline"
                 className="flex items-center space-x-2"
               >
@@ -590,7 +676,9 @@ export default function DashboardPage() {
             <div className="flex items-center space-x-4 bg-blue-100 border border-blue-300 rounded-lg px-6 py-3">
               <div className="flex items-center space-x-2">
                 <span className="text-2xl">🧳</span>
-                <span className="text-blue-900 font-medium text-sm">Welcome! Here's your travel history with sample data</span>
+                <span className="text-blue-900 font-medium text-sm">
+                  {isAdmin ? "Admin Dashboard: Sample travel data for demonstration" : "Welcome! Here's your travel history with sample data"}
+                </span>
               </div>
               <Button
                 variant="outline"

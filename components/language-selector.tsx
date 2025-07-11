@@ -30,38 +30,47 @@ interface LanguageSelectorProps {
 export function LanguageSelector({ onLanguageChange, compact = false }: LanguageSelectorProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en")
   const [isOpen, setIsOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   // Detect browser language on mount
   useEffect(() => {
-    const detectLanguage = () => {
-      // Check localStorage first
-      const savedLanguage = localStorage.getItem("preferredLanguage")
-      if (savedLanguage && languages.find(lang => lang.code === savedLanguage)) {
-        return savedLanguage
+    // Mark as client-side after hydration
+    setIsClient(true)
+    
+    // Only run client-side code after hydration
+    if (typeof window !== 'undefined') {
+      const detectLanguage = () => {
+        // Check localStorage first
+        const savedLanguage = localStorage.getItem("preferredLanguage")
+        if (savedLanguage && languages.find(lang => lang.code === savedLanguage)) {
+          return savedLanguage
+        }
+
+        // Detect from browser
+        const browserLang = navigator.language.split("-")[0] // Get language without region
+        const supportedLang = languages.find(lang => lang.code === browserLang)
+        
+        return supportedLang ? supportedLang.code : "en"
       }
 
-      // Detect from browser
-      const browserLang = navigator.language.split("-")[0] // Get language without region
-      const supportedLang = languages.find(lang => lang.code === browserLang)
+      const detectedLanguage = detectLanguage()
+      setSelectedLanguage(detectedLanguage)
       
-      return supportedLang ? supportedLang.code : "en"
-    }
-
-    const detectedLanguage = detectLanguage()
-    setSelectedLanguage(detectedLanguage)
-    
-    // Save to localStorage
-    localStorage.setItem("preferredLanguage", detectedLanguage)
-    
-    // Notify parent component
-    if (onLanguageChange) {
-      onLanguageChange(detectedLanguage)
+      // Save to localStorage
+      localStorage.setItem("preferredLanguage", detectedLanguage)
+      
+      // Notify parent component
+      if (onLanguageChange) {
+        onLanguageChange(detectedLanguage)
+      }
     }
   }, [onLanguageChange])
 
   const handleLanguageChange = (languageCode: string) => {
     setSelectedLanguage(languageCode)
-    localStorage.setItem("preferredLanguage", languageCode)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("preferredLanguage", languageCode)
+    }
     setIsOpen(false)
     
     if (onLanguageChange) {
@@ -69,7 +78,9 @@ export function LanguageSelector({ onLanguageChange, compact = false }: Language
     }
 
     // Dispatch event for useTranslation hook to listen
-    window.dispatchEvent(new CustomEvent("languageChanged", { detail: languageCode }))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent("languageChanged", { detail: languageCode }))
+    }
 
     // In a real app, you would trigger language change here
     // For now, we'll just show a console log
@@ -77,6 +88,20 @@ export function LanguageSelector({ onLanguageChange, compact = false }: Language
   }
 
   const currentLanguage = languages.find(lang => lang.code === selectedLanguage) || languages[0]
+
+  // Don't render until client-side to prevent hydration mismatch
+  if (!isClient) {
+    return (
+      <Button
+        variant="ghost"
+        className="flex items-center space-x-2 hover:bg-gray-100 transition-colors duration-200"
+      >
+        <Globe className="h-4 w-4 text-gray-600" />
+        <span className="text-lg">🇺🇸</span>
+        <span className="text-sm font-medium text-gray-700">EN</span>
+      </Button>
+    )
+  }
 
   if (compact) {
     // Compact version for mobile/smaller screens

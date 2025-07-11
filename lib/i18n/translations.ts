@@ -378,24 +378,31 @@ export function getTranslation(key: string, language: string = "en", params?: Re
 // Hook for using translations in components
 export function useTranslation() {
   const [currentLanguage, setCurrentLanguage] = useState<string>("en")
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferredLanguage") || "en"
-    setCurrentLanguage(savedLanguage)
+    // Mark as client-side after hydration
+    setIsClient(true)
     
-    // Listen for language changes
-    const handleLanguageChange = () => {
-      const newLanguage = localStorage.getItem("preferredLanguage") || "en"
-      setCurrentLanguage(newLanguage)
+    // Only access localStorage on client-side
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem("preferredLanguage") || "en"
+      setCurrentLanguage(savedLanguage)
+      
+      // Listen for language changes
+      const handleLanguageChange = () => {
+        const newLanguage = localStorage.getItem("preferredLanguage") || "en"
+        setCurrentLanguage(newLanguage)
+      }
+      
+      window.addEventListener("languageChanged", handleLanguageChange)
+      return () => window.removeEventListener("languageChanged", handleLanguageChange)
     }
-    
-    window.addEventListener("languageChanged", handleLanguageChange)
-    return () => window.removeEventListener("languageChanged", handleLanguageChange)
   }, [])
 
   const t = (key: string, params?: Record<string, string | number>) => {
     return getTranslation(key, currentLanguage, params)
   }
 
-  return { t, currentLanguage }
+  return { t, currentLanguage, isClient }
 } 

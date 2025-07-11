@@ -172,13 +172,12 @@ function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; 
 export default function SchengenVisaCalculator() {
   // Create sample data to demonstrate the calculator functionality
   const createSampleData = (): VisaEntry[] => {
-    const today = new Date()
     return [
       {
         id: "1",
         country: "FR", // France
-        startDate: new Date(2024, 2, 15), // March 15, 2024
-        endDate: new Date(2024, 2, 28),   // March 28, 2024
+        startDate: new Date("2024-03-15"), // March 15, 2024
+        endDate: new Date("2024-03-28"),   // March 28, 2024
         days: 0, // Will be calculated
         daysInLast180: 0, // Will be calculated
         daysRemaining: 0, // Will be calculated
@@ -188,8 +187,8 @@ export default function SchengenVisaCalculator() {
       {
         id: "2", 
         country: "DE", // Germany
-        startDate: new Date(2024, 4, 10), // May 10, 2024
-        endDate: new Date(2024, 4, 24),   // May 24, 2024
+        startDate: new Date("2024-05-10"), // May 10, 2024
+        endDate: new Date("2024-05-24"),   // May 24, 2024
         days: 0, // Will be calculated
         daysInLast180: 0, // Will be calculated
         daysRemaining: 0, // Will be calculated
@@ -199,8 +198,8 @@ export default function SchengenVisaCalculator() {
       {
         id: "3",
         country: "ES", // Spain
-        startDate: new Date(2024, 5, 20), // June 20, 2024
-        endDate: new Date(2024, 6, 5),    // July 5, 2024
+        startDate: new Date("2024-06-20"), // June 20, 2024
+        endDate: new Date("2024-07-05"),    // July 5, 2024
         days: 0, // Will be calculated
         daysInLast180: 0, // Will be calculated
         daysRemaining: 0, // Will be calculated
@@ -210,8 +209,8 @@ export default function SchengenVisaCalculator() {
       {
         id: "4",
         country: "IT", // Italy - Planned future trip
-        startDate: new Date(2024, 7, 1),  // August 1, 2024
-        endDate: new Date(2024, 7, 15),   // August 15, 2024
+        startDate: new Date("2024-08-01"),  // August 1, 2024
+        endDate: new Date("2024-08-15"),   // August 15, 2024
         days: 0, // Will be calculated
         daysInLast180: 0, // Will be calculated
         daysRemaining: 0, // Will be calculated
@@ -443,18 +442,18 @@ export default function SchengenVisaCalculator() {
   const totalDaysRemaining = calculationResult?.daysRemaining || 90
 
   return (
-    <div className="min-h-screen font-body" style={{ backgroundColor: "#F4F2ED" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#F4F2ED" }}>
       {/* Header */}
       <header className="shadow-sm border-b border-gray-200" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
-              <h1 className="text-xl font-semibold font-brand text-gray-900">Schengen Visa Calculator</h1>
+              <h1 className="text-xl font-semibold text-gray-900">Schengen Visa Calculator</h1>
               <nav className="hidden md:flex space-x-6">
-                <Link href="/travel-quiz" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-ui">
+                <Link href="/travel-quiz" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                   🧭 Travel Quiz
                 </Link>
-                <Link href="/destination-checker" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-ui">
+                <Link href="/destination-checker" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                   🌍 Destinations
                 </Link>
               </nav>
@@ -463,13 +462,13 @@ export default function SchengenVisaCalculator() {
               <LanguageSelector />
               <div className="hidden md:flex items-center space-x-4">
                 <Link href="/login">
-                  <Button className="bg-black hover:bg-gray-800 text-white transition-colors duration-200 px-8 py-2 rounded-full font-ui">
+                  <Button className="bg-black hover:bg-gray-800 text-white transition-colors duration-200 px-8 py-2 rounded-full">
                     Login
                   </Button>
                 </Link>
                 <Link href="/signup">
                   <Button
-                    className="text-white transition-colors duration-200 px-8 py-2 rounded-full hover:opacity-90 font-ui"
+                    className="text-white transition-colors duration-200 px-8 py-2 rounded-full hover:opacity-90"
                     style={{ backgroundColor: "#FA9937" }}
                   >
                     Sign Up
@@ -494,7 +493,7 @@ export default function SchengenVisaCalculator() {
               <div className="flex flex-col space-y-4">
                 <Link 
                   href="/travel-quiz" 
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 font-ui px-4 py-2"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 px-4 py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>🧭</span>
@@ -502,7 +501,7 @@ export default function SchengenVisaCalculator() {
                 </Link>
                 <Link 
                   href="/destination-checker" 
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 font-ui px-4 py-2"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 px-4 py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>🌍</span>
@@ -510,13 +509,13 @@ export default function SchengenVisaCalculator() {
                 </Link>
                 <div className="flex flex-col space-y-2 px-4">
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full bg-black hover:bg-gray-800 text-white transition-colors duration-200 py-2 rounded-full font-ui">
+                    <Button className="w-full bg-black hover:bg-gray-800 text-white transition-colors duration-200 py-2 rounded-full">
                       Login
                     </Button>
                   </Link>
                   <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
                     <Button
-                      className="w-full text-white transition-colors duration-200 py-2 rounded-full hover:opacity-90 font-ui"
+                      className="w-full text-white transition-colors duration-200 py-2 rounded-full hover:opacity-90"
                       style={{ backgroundColor: "#FA9937" }}
                     >
                       Sign Up
@@ -533,14 +532,14 @@ export default function SchengenVisaCalculator() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="animate-in slide-in-from-bottom-8 duration-1000 ease-out">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display text-gray-900 mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
               Plan Smarter.
               <br />
               Travel Easier.
             </h1>
           </div>
           <div className="animate-in slide-in-from-bottom-8 duration-1000 delay-1000 ease-out">
-            <h2 className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto border border-gray-300 rounded-lg p-6 bg-white/50 backdrop-blur-sm font-body">
+            <h2 className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto border border-gray-300 rounded-lg p-6 bg-white/50 backdrop-blur-sm">
               Know Where You Can Go — Instantly See Visa Rules, Book Trips, and Travel Confidently.
             </h2>
           </div>
@@ -884,28 +883,28 @@ export default function SchengenVisaCalculator() {
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Destination Checker Card */}
-            <div className="animate-in slide-in-from-bottom-8 duration-1000 delay-1500 ease-out">
+            <div className="animate-in slide-in-from-bottom-8 duration-1000 delay-1000 ease-out">
               <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 h-full">
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-2xl">🌍</span>
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold font-brand text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   Where Can You Travel?
                 </h3>
-                <p className="text-gray-600 font-body text-sm mb-4">
+                <p className="text-gray-600 text-sm mb-4">
                   Discover all visa-free destinations available to your passport instantly
                 </p>
                 <Link href="/destination-checker">
                   <Button 
-                    className="w-full text-white font-ui font-medium py-3 rounded-lg hover:opacity-90 transition-all duration-200"
+                    className="w-full text-white font-medium py-3 rounded-lg hover:opacity-90 transition-all duration-200"
                     style={{ backgroundColor: "#FA9937" }}
                   >
                     Check Your Travel Options →
                   </Button>
                 </Link>
-                <p className="text-xs text-gray-500 mt-2 font-body">
+                <p className="text-xs text-gray-500 mt-2">
                   Free • No registration required • Instant results
                 </p>
               </div>
@@ -919,21 +918,21 @@ export default function SchengenVisaCalculator() {
                     <span className="text-2xl">🧭</span>
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold font-brand text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {t("home.quiz.title")}
                 </h3>
-                <p className="text-gray-600 font-body text-sm mb-4">
+                <p className="text-gray-600 text-sm mb-4">
                   {t("home.quiz.subtitle")}
                 </p>
                 <Link href="/travel-quiz">
                   <Button 
                     variant="outline"
-                    className="w-full font-ui font-medium py-3 rounded-lg border-purple-300 text-purple-700 hover:bg-purple-50 transition-all duration-200"
+                    className="w-full font-medium py-3 rounded-lg border-purple-300 text-purple-700 hover:bg-purple-50 transition-all duration-200"
                   >
                     {t("home.quiz.button")}
                   </Button>
                 </Link>
-                <p className="text-xs text-gray-500 mt-2 font-body">
+                <p className="text-xs text-gray-500 mt-2">
                   {t("home.quiz.features")}
                 </p>
               </div>
@@ -972,6 +971,14 @@ export default function SchengenVisaCalculator() {
                 >
                   Terms & Conditions
                 </a>
+                <Link
+                  href="/admin-login"
+                  className="text-orange-600 hover:text-orange-800 transition-colors duration-200 flex items-center space-x-1"
+                  title="Admin Access"
+                >
+                  <span>🔐</span>
+                  <span>Admin</span>
+                </Link>
               </div>
             </div>
 

@@ -9,24 +9,54 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') {
+      setLoading(false)
+      return
+    }
+
+    let isMounted = true
+    const supabase = createClient()
+
     // Get initial session
     const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        
+        if (isMounted) {
+          setUser(session?.user ?? null)
 
-      if (session?.user) {
-        // Fetch user profile
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+          if (session?.user) {
+            // Fetch user profile
+            const { data: profileData, error: profileError } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", session.user.id)
+              .single()
 
-        setProfile(profileData)
+            if (isMounted) {
+              if (profileError) {
+                console.warn("Error fetching profile:", profileError)
+              } else {
+                setProfile(profileData)
+              }
+            }
+          }
+
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error("Error in getInitialSession:", err)
+        if (isMounted) {
+          setError("Failed to load session")
+          setLoading(false)
+        }
       }
-
-      setLoading(false)
     }
 
     getInitialSession()
@@ -35,31 +65,59 @@ export function useAuth() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null)
+      if (isMounted) {
+        setUser(session?.user ?? null)
 
-      if (session?.user) {
-        // Fetch user profile
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+        if (session?.user) {
+          try {
+            // Fetch user profile
+            const { data: profileData, error: profileError } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", session.user.id)
+              .single()
 
-        setProfile(profileData)
-      } else {
-        setProfile(null)
+            if (isMounted) {
+              if (profileError) {
+                console.warn("Error fetching profile:", profileError)
+              } else {
+                setProfile(profileData)
+              }
+            }
+          } catch (err) {
+            console.error("Error fetching profile:", err)
+          }
+        } else {
+          setProfile(null)
+        }
+
+        setLoading(false)
       }
-
-      setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      if (typeof window !== 'undefined') {
+        const supabase = createClient()
+        await supabase.auth.signOut()
+      }
+    } catch (err) {
+      console.error("Error signing out:", err)
+      setError("Failed to sign out")
+    }
   }
 
   return {
     user,
     profile,
     loading,
+    error,
     signOut,
     isAuthenticated: !!user,
   }
