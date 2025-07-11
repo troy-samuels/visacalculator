@@ -129,10 +129,12 @@ function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; 
 
   // Color logic based on days remaining
   const getColor = () => {
-    if (daysRemaining > 60) return "#10B981" // Green
-    if (daysRemaining > 30) return "#F59E0B" // Yellow/Orange
-    if (daysRemaining > 10) return "#EF4444" // Red
-    return "#DC2626" // Dark Red
+    if (daysRemaining > 60) return "#10B981" // Green (safe zone)
+    if (daysRemaining > 45) return "#84CC16" // Light green 
+    if (daysRemaining > 30) return "#EAB308" // Yellow (caution)
+    if (daysRemaining > 15) return "#F59E0B" // Orange (warning)
+    if (daysRemaining > 5) return "#EF4444"  // Red (danger)
+    return "#DC2626" // Dark red (critical)
   }
 
   return (
@@ -168,19 +170,70 @@ function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; 
 }
 
 export default function SchengenVisaCalculator() {
-  const [entries, setEntries] = useState<VisaEntry[]>([
-    {
-      id: "1",
-      country: "",
-      startDate: null,
-      endDate: null,
-      days: 0,
-      daysInLast180: 0,
-      daysRemaining: 90,
-      activeColumn: "country",
-      warnings: []
-    },
-  ])
+  // Create sample data to demonstrate the calculator functionality
+  const createSampleData = (): VisaEntry[] => {
+    const today = new Date()
+    return [
+      {
+        id: "1",
+        country: "FR", // France
+        startDate: new Date(2024, 2, 15), // March 15, 2024
+        endDate: new Date(2024, 2, 28),   // March 28, 2024
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      },
+      {
+        id: "2", 
+        country: "DE", // Germany
+        startDate: new Date(2024, 4, 10), // May 10, 2024
+        endDate: new Date(2024, 4, 24),   // May 24, 2024
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      },
+      {
+        id: "3",
+        country: "ES", // Spain
+        startDate: new Date(2024, 5, 20), // June 20, 2024
+        endDate: new Date(2024, 6, 5),    // July 5, 2024
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      },
+      {
+        id: "4",
+        country: "IT", // Italy - Planned future trip
+        startDate: new Date(2024, 7, 1),  // August 1, 2024
+        endDate: new Date(2024, 7, 15),   // August 15, 2024
+        days: 0, // Will be calculated
+        daysInLast180: 0, // Will be calculated
+        daysRemaining: 0, // Will be calculated
+        activeColumn: "complete" as const,
+        warnings: []
+      },
+      {
+        id: "5",
+        country: "",
+        startDate: null,
+        endDate: null,
+        days: 0,
+        daysInLast180: 0,
+        daysRemaining: 90,
+        activeColumn: "country",
+        warnings: []
+      }
+    ]
+  }
+
+  const [entries, setEntries] = useState<VisaEntry[]>(createSampleData())
+  const [isDemoMode, setIsDemoMode] = useState(true)
 
   const [calculationResult, setCalculationResult] = useState<SchengenCalculationResult | null>(null)
   const [nextEntryResult, setNextEntryResult] = useState<NextEntryResult | null>(null)
@@ -190,6 +243,26 @@ export default function SchengenVisaCalculator() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const { t } = useTranslation()
+
+  const loadDemoData = () => {
+    setEntries(createSampleData())
+    setIsDemoMode(true)
+  }
+
+  const startFresh = () => {
+    setEntries([{
+      id: "1",
+      country: "",
+      startDate: null,
+      endDate: null,
+      days: 0,
+      daysInLast180: 0,
+      daysRemaining: 90,
+      activeColumn: "country",
+      warnings: []
+    }])
+    setIsDemoMode(false)
+  }
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -219,7 +292,7 @@ export default function SchengenVisaCalculator() {
       return
     }
 
-    // Calculate current status
+    // Calculate current status from today's perspective
     const result = calculator.calculateDaysInSchengen(travelHistory)
     setCalculationResult(result)
 
@@ -231,8 +304,54 @@ export default function SchengenVisaCalculator() {
       setNextEntryResult(null)
     }
 
-    // Note: Removed setEntries call here to prevent infinite loop
-    // Entry updates are now handled in the individual update functions
+    // Update each entry with proper calculations
+    setEntries(currentEntries => {
+      return currentEntries.map((entry, index) => {
+        if (!entry.startDate || !entry.endDate) {
+          // For incomplete entries, show current overall status
+          return { 
+            ...entry, 
+            daysInLast180: 0,
+            daysRemaining: result.daysRemaining,
+            warnings: [] 
+          }
+        }
+
+        // Calculate individual trip days
+        const tripDays = differenceInDays(entry.endDate, entry.startDate) + 1
+
+        // Calculate how many days from THIS trip fall within last 180 days from today
+        const thisTrip: TravelRecord = {
+          id: entry.id,
+          country: entry.country,
+          entryDate: entry.startDate,
+          exitDate: entry.endDate
+        }
+        const thisTripResult = calculator.calculateDaysInSchengen([thisTrip])
+        const thisTripDaysInLast180 = thisTripResult.daysUsed
+
+        // For "days remaining": calculate cumulative impact up to this trip (progressive)
+        const tripsUpToThis = travelHistory.slice(0, index + 1)
+        const cumulativeResult = calculator.calculateDaysInSchengen(tripsUpToThis)
+
+        // Validate this specific trip
+        const tripValidation = calculator.validatePlannedTrip(
+          travelHistory.filter(t => t.id !== entry.id),
+          entry.startDate,
+          entry.endDate,
+          entry.country
+        )
+
+        return {
+          ...entry,
+          days: tripDays,
+          daysInLast180: thisTripDaysInLast180, // Days from THIS trip that count in last 180
+          daysRemaining: cumulativeResult.daysRemaining, // Days remaining after this trip (progressive)
+          warnings: tripValidation.warnings,
+          activeColumn: "complete" as const
+        }
+      })
+    })
   }
 
   const addEntry = () => {
@@ -458,6 +577,45 @@ export default function SchengenVisaCalculator() {
         </section>
       )}
 
+      {/* Demo Controls */}
+      <section className="pb-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center space-x-4">
+            {isDemoMode ? (
+              <div className="flex items-center space-x-4 bg-blue-50 border border-blue-200 rounded-lg px-6 py-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">🧳</span>
+                  <span className="text-blue-900 font-medium text-sm">Demo Mode: Showing sample travel history</span>
+                </div>
+                <Button
+                  onClick={startFresh}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100 bg-transparent"
+                >
+                  Start Fresh
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4 bg-gray-50 border border-gray-200 rounded-lg px-6 py-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">✨</span>
+                  <span className="text-gray-700 font-medium text-sm">Ready to plan your trips</span>
+                </div>
+                <Button
+                  onClick={loadDemoData}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 bg-transparent"
+                >
+                  View Demo
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Calculator Section */}
       <section className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -649,7 +807,7 @@ export default function SchengenVisaCalculator() {
                     {/* Days Remaining with Progress Circle */}
                     <div className={`${getColumnStyles(entry, "results")} rounded-lg p-2`}>
                       <div className="flex items-center justify-center h-20">
-                        <ProgressCircle daysRemaining={totalDaysRemaining} size={80} />
+                        <ProgressCircle daysRemaining={entry.daysRemaining} size={80} />
                       </div>
                     </div>
                   </div>
