@@ -945,35 +945,26 @@ export default function SchengenVisaCalculator() {
       <footer className="text-gray-900 py-12" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col space-y-8">
-            {/* Top section with logo and links */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 className="bg-gray-200 border-gray-300 text-gray-900 hover:bg-gray-300 rounded-full px-6"
               >
                 Logo
               </Button>
-
-              {/* Legal Links */}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
-                <a
-                  href="/legal-disclaimer"
-                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                >
+                <Link href="/legal-disclaimer" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                   Legal Disclaimer
-                </a>
-                <a href="/privacy-policy" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                </Link>
+                <Link href="/privacy-policy" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                   Privacy Policy
-                </a>
-                <a
-                  href="/terms-and-conditions"
-                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                >
+                </Link>
+                <Link href="/terms-and-conditions" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                   Terms & Conditions
-                </a>
-                <Link
-                  href="/admin-login"
-                  className="text-orange-600 hover:text-orange-800 transition-colors duration-200 flex items-center space-x-1"
+                </Link>
+                <Link 
+                  href="/admin-login" 
+                  className="text-orange-600 hover:text-orange-800 transition-colors duration-200 flex items-center space-x-1" 
                   title="Admin Access"
                 >
                   <span>🔐</span>
@@ -981,14 +972,18 @@ export default function SchengenVisaCalculator() {
                 </Link>
               </div>
             </div>
-
-            {/* Bottom section with copyright */}
             <div className="border-t border-gray-300 pt-6">
               <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-                <div className="text-sm text-gray-600">© 2024 Schengen Visa Calculator. All rights reserved.</div>
+                <div className="text-sm text-gray-600">
+                  © 2024 Schengen Visa Calculator. All rights reserved.
+                </div>
                 <div className="text-xs text-gray-500">
                   This tool provides estimates only. Please consult official sources for accurate visa requirements.
                 </div>
+              </div>
+              {/* Deployment verification marker */}
+              <div className="text-xs text-gray-400 mt-2 text-center">
+                v2025.1.11.21.15 - Fresh deployment active
               </div>
             </div>
           </div>
