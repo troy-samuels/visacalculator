@@ -27,5 +27,8 @@
         }
       ]
     }
-  ]
+  ],
+  "analytics": false,
+  "speedInsights": false,
+  "webAnalytics": false
 } 

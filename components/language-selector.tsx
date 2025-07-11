@@ -89,99 +89,35 @@ export function LanguageSelector({ onLanguageChange, compact = false }: Language
 
   const currentLanguage = languages.find(lang => lang.code === selectedLanguage) || languages[0]
 
-  // Don't render until client-side to prevent hydration mismatch
-  if (!isClient) {
-    return (
+  return (
+    <div className="relative">
       <Button
         variant="ghost"
+        onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 hover:bg-gray-100 transition-colors duration-200"
       >
         <Globe className="h-4 w-4 text-gray-600" />
-        <span className="text-lg">🇺🇸</span>
-        <span className="text-sm font-medium text-gray-700">EN</span>
+        <span className="text-lg">{currentLanguage.flag}</span>
+        <span className="text-sm font-medium text-gray-700">{currentLanguage.name}</span>
       </Button>
-    )
-  }
 
-  if (compact) {
-    // Compact version for mobile/smaller screens
-    return (
-      <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="w-[120px] h-9">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">{currentLanguage.flag}</span>
-            <span className="text-sm font-medium">{currentLanguage.code.toUpperCase()}</span>
-          </div>
-        </SelectTrigger>
-        <SelectContent>
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
           {languages.map((language) => (
-            <SelectItem key={language.code} value={language.code}>
-              <div className="flex items-center space-x-3">
-                <span>{language.flag}</span>
-                <div className="flex flex-col">
-                  <span className="font-medium">{language.nativeName}</span>
-                  <span className="text-xs text-gray-500">{language.name}</span>
-                </div>
-                {selectedLanguage === language.code && (
-                  <Check className="h-4 w-4 text-green-600" />
-                )}
-              </div>
-            </SelectItem>
+            <button
+              key={language.code}
+              onClick={() => handleLanguageChange(language.code)}
+              className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200 ${
+                selectedLanguage === language.code ? "bg-blue-50 text-blue-600" : "text-gray-700"
+              }`}
+            >
+              <span className="text-lg">{language.flag}</span>
+              <span className="text-sm font-medium">{language.name}</span>
+            </button>
           ))}
-        </SelectContent>
-      </Select>
-    )
-  }
-
-  // Full version for desktop
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex items-center space-x-2 hover:bg-gray-100 transition-colors duration-200"
-        >
-          <Globe className="h-4 w-4 text-gray-600" />
-          <span className="text-lg">{currentLanguage.flag}</span>
-          <span className="text-sm font-medium text-gray-700">
-            {currentLanguage.code.toUpperCase()}
-          </span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-0" align="end">
-        <div className="p-4">
-          <h3 className="font-semibold text-gray-900 mb-3 font-brand">Choose Language</h3>
-          <div className="space-y-1">
-            {languages.map((language) => (
-              <Button
-                key={language.code}
-                variant="ghost"
-                className={`w-full justify-start text-left font-normal ${
-                  selectedLanguage === language.code ? "bg-blue-50 text-blue-700" : ""
-                }`}
-                onClick={() => handleLanguageChange(language.code)}
-              >
-                <div className="flex items-center space-x-3 w-full">
-                  <span className="text-lg">{language.flag}</span>
-                  <div className="flex-1">
-                    <div className="font-medium">{language.nativeName}</div>
-                    <div className="text-xs text-gray-500">{language.name}</div>
-                  </div>
-                  {selectedLanguage === language.code && (
-                    <Check className="h-4 w-4 text-blue-600" />
-                  )}
-                </div>
-              </Button>
-            ))}
-          </div>
-          <div className="mt-3 pt-3 border-t">
-            <p className="text-xs text-gray-500 text-center">
-              Language detected from your browser: {navigator.language}
-            </p>
-          </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   )
 }
 

@@ -9,6 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  reactStrictMode: true,
 }
 
 export default nextConfig
