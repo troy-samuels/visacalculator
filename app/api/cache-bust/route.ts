@@ -3,18 +3,18 @@ export const revalidate = 0
 export async function GET() {
   return new Response(JSON.stringify({
     timestamp: new Date().toISOString(),
-    message: "FORCE CSS REBUILD - Fresh deployment with new CSS assets",
-    deployment: "2025-07-12-22-15-FORCE-CSS-REBUILD", 
-    version: "v2.1.0-CSS-FIX"
+    message: "🚨 NUCLEAR DEPLOYMENT - Complete fresh rebuild with working folder code",
+    deployment: "2025-07-12-21-30-NUCLEAR-OPTION", 
+    version: "v3.0.0-WORKING-FOLDER-MATCH",
+    cacheBust: Date.now()
   }), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       'Pragma': 'no-cache',
       'Expires': '0',
-      'Vercel-CDN-Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-      'CDN-Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
+      'Surrogate-Control': 'no-store'
     }
   })
 } 

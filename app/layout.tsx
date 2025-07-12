@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'Schengen Visa Calculator - FRESH V3',
+  description: 'Track your Schengen visa days and calculate remaining time',
 }
 
 export default function RootLayout({
