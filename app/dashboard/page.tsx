@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Calendar, ChevronRight } from "lucide-react"
+import { Plus, Calendar, ChevronRight, User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -9,10 +9,13 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format, differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks/useAuth"
+import { createClient } from "@/lib/supabase/client"
+import { ProfileCompletionModal } from "@/components/profile-completion-modal"
+import type { Profile, Country } from "@/lib/types/database"
+import { useRouter } from "next/navigation"
 
-interface VisaEntry {
+interface VisaEntryLocal {
   id: string
   country: string
   startDate: Date | null
@@ -22,39 +25,6 @@ interface VisaEntry {
   daysRemaining: number
   activeColumn: "country" | "dates" | "complete" | null
 }
-
-const schengenCountries = [
-  { code: "AT", name: "Austria", flag: "🇦🇹" },
-  { code: "BE", name: "Belgium", flag: "🇧🇪" },
-  { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
-  { code: "HR", name: "Croatia", flag: "🇭🇷" },
-  { code: "CY", name: "Cyprus", flag: "🇨🇾" },
-  { code: "CZ", name: "Czech Republic", flag: "🇨🇿" },
-  { code: "DK", name: "Denmark", flag: "🇩🇰" },
-  { code: "EE", name: "Estonia", flag: "🇪🇪" },
-  { code: "FI", name: "Finland", flag: "🇫🇮" },
-  { code: "FR", name: "France", flag: "🇫🇷" },
-  { code: "DE", name: "Germany", flag: "🇩🇪" },
-  { code: "GR", name: "Greece", flag: "🇬🇷" },
-  { code: "HU", name: "Hungary", flag: "🇭🇺" },
-  { code: "IS", name: "Iceland", flag: "🇮🇸" },
-  { code: "IT", name: "Italy", flag: "🇮🇹" },
-  { code: "LV", name: "Latvia", flag: "🇱🇻" },
-  { code: "LI", name: "Liechtenstein", flag: "🇱🇮" },
-  { code: "LT", name: "Lithuania", flag: "🇱🇹" },
-  { code: "LU", name: "Luxembourg", flag: "🇱🇺" },
-  { code: "MT", name: "Malta", flag: "🇲🇹" },
-  { code: "NL", name: "Netherlands", flag: "🇳🇱" },
-  { code: "NO", name: "Norway", flag: "🇳🇴" },
-  { code: "PL", name: "Poland", flag: "🇵🇱" },
-  { code: "PT", name: "Portugal", flag: "🇵🇹" },
-  { code: "RO", name: "Romania", flag: "🇷🇴" },
-  { code: "SK", name: "Slovakia", flag: "🇸🇰" },
-  { code: "SI", name: "Slovenia", flag: "🇸🇮" },
-  { code: "ES", name: "Spain", flag: "🇪🇸" },
-  { code: "SE", name: "Sweden", flag: "🇸🇪" },
-  { code: "CH", name: "Switzerland", flag: "🇨🇭" },
-]
 
 // Animated Counter Component
 function AnimatedCounter({ value, duration = 500 }: { value: number; duration?: number }) {
@@ -162,28 +132,120 @@ function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; 
   )
 }
 
-export default function SchengenVisaCalculator() {
-  const [entries, setEntries] = useState<VisaEntry[]>([
-    {
-      id: "1",
-      country: "",
-      startDate: null,
-      endDate: null,
-      days: 0,
-      daysInLast180: 0,
-      daysRemaining: 90,
-      activeColumn: "country",
-    },
-  ])
-
-  const { user, loading: authLoading } = useAuth()
+export default function DashboardPage() {
+  const { user, profile, loading: authLoading, signOut } = useAuth()
   const router = useRouter()
+  const supabase = createClient()
 
+  const [entries, setEntries] = useState<VisaEntryLocal[]>([])
+  const [countries, setCountries] = useState<Country[]>([])
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Redirect if not authenticated
   useEffect(() => {
-    if (!authLoading && user) {
-      router.push("/dashboard")
+    if (!authLoading && !user) {
+      router.push("/login")
     }
   }, [user, authLoading, router])
+
+  // Load data when user is available
+  useEffect(() => {
+    if (user && profile) {
+      loadUserData()
+      loadCountries()
+    }
+  }, [user, profile])
+
+  // Check if profile needs completion
+  useEffect(() => {
+    if (profile && !profile.profile_completed) {
+      setShowProfileModal(true)
+    }
+  }, [profile])
+
+  const loadCountries = async () => {
+    try {
+      const { data, error } = await supabase.from("countries").select("*").order("name")
+
+      if (error) throw error
+      setCountries(data || [])
+    } catch (error) {
+      console.error("Error loading countries:", error)
+    }
+  }
+
+  const loadUserData = async () => {
+    if (!user) return
+
+    try {
+      setLoading(true)
+      const { data: visaEntries, error } = await supabase
+        .from("visa_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+
+      if (error) throw error
+
+      // Convert database entries to local format
+      const localEntries: VisaEntryLocal[] = (visaEntries || []).map((entry) => ({
+        id: entry.id,
+        country: entry.country_code,
+        startDate: new Date(entry.start_date),
+        endDate: new Date(entry.end_date),
+        days: entry.days || 0,
+        daysInLast180: 0,
+        daysRemaining: 90,
+        activeColumn: "complete" as const,
+      }))
+
+      // If no entries, create a default one
+      if (localEntries.length === 0) {
+        localEntries.push({
+          id: "new-1",
+          country: "",
+          startDate: null,
+          endDate: null,
+          days: 0,
+          daysInLast180: 0,
+          daysRemaining: 90,
+          activeColumn: "country",
+        })
+      }
+
+      updateAllEntries(localEntries)
+    } catch (error) {
+      console.error("Error loading user data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveEntry = async (entry: VisaEntryLocal) => {
+    if (!user || !entry.startDate || !entry.endDate || !entry.country) return
+
+    try {
+      const entryData = {
+        user_id: user.id,
+        country_code: entry.country,
+        start_date: entry.startDate.toISOString().split("T")[0],
+        end_date: entry.endDate.toISOString().split("T")[0],
+      }
+
+      if (entry.id.startsWith("new-")) {
+        // Create new entry
+        const { error } = await supabase.from("visa_entries").insert(entryData)
+        if (error) throw error
+      } else {
+        // Update existing entry
+        const { error } = await supabase.from("visa_entries").update(entryData).eq("id", entry.id)
+        if (error) throw error
+      }
+    } catch (error) {
+      console.error("Error saving entry:", error)
+    }
+  }
 
   const calculateDaysInLast180 = (startDate: Date, endDate: Date) => {
     const today = new Date()
@@ -199,7 +261,7 @@ export default function SchengenVisaCalculator() {
     return 0
   }
 
-  const updateAllEntries = (updatedEntries: VisaEntry[]) => {
+  const updateAllEntries = (updatedEntries: VisaEntryLocal[]) => {
     // Calculate total days in last 180 days across all entries
     const totalDaysInLast180 = updatedEntries.reduce((sum, entry) => {
       if (entry.startDate && entry.endDate) {
@@ -214,7 +276,7 @@ export default function SchengenVisaCalculator() {
         entry.startDate && entry.endDate ? calculateDaysInLast180(entry.startDate, entry.endDate) : 0
 
       // Determine active column based on completion state
-      let activeColumn: VisaEntry["activeColumn"] = "country"
+      let activeColumn: VisaEntryLocal["activeColumn"] = "country"
       if (entry.country && !entry.startDate) {
         activeColumn = "dates"
       } else if (entry.country && entry.startDate && entry.endDate) {
@@ -235,8 +297,8 @@ export default function SchengenVisaCalculator() {
   }
 
   const addEntry = () => {
-    const newEntry: VisaEntry = {
-      id: Date.now().toString(),
+    const newEntry: VisaEntryLocal = {
+      id: `new-${Date.now()}`,
       country: "",
       startDate: null,
       endDate: null,
@@ -248,7 +310,7 @@ export default function SchengenVisaCalculator() {
     updateAllEntries([...entries, newEntry])
   }
 
-  const updateEntry = (id: string, field: keyof VisaEntry, value: any) => {
+  const updateEntry = (id: string, field: keyof VisaEntryLocal, value: any) => {
     const updatedEntries = entries.map((entry) => {
       if (entry.id === id) {
         const updatedEntry = { ...entry, [field]: value }
@@ -258,6 +320,11 @@ export default function SchengenVisaCalculator() {
           if (updatedEntry.startDate && updatedEntry.endDate) {
             updatedEntry.days = differenceInDays(updatedEntry.endDate, updatedEntry.startDate) + 1
           }
+        }
+
+        // Auto-save when entry is complete
+        if (updatedEntry.country && updatedEntry.startDate && updatedEntry.endDate) {
+          saveEntry(updatedEntry)
         }
 
         return updatedEntry
@@ -284,6 +351,11 @@ export default function SchengenVisaCalculator() {
           updatedEntry.days = 0
         }
 
+        // Auto-save when entry is complete
+        if (updatedEntry.country && updatedEntry.startDate && updatedEntry.endDate) {
+          saveEntry(updatedEntry)
+        }
+
         return updatedEntry
       }
       return entry
@@ -292,7 +364,20 @@ export default function SchengenVisaCalculator() {
     updateAllEntries(updatedEntries)
   }
 
-  const getColumnStyles = (entry: VisaEntry, columnType: "country" | "dates" | "results") => {
+  const handleProfileComplete = async (updatedProfile: Partial<Profile>) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase.from("profiles").update(updatedProfile).eq("id", user.id)
+
+      if (error) throw error
+      setShowProfileModal(false)
+    } catch (error) {
+      console.error("Error updating profile:", error)
+    }
+  }
+
+  const getColumnStyles = (entry: VisaEntryLocal, columnType: "country" | "dates" | "results") => {
     const isActive =
       entry.activeColumn === columnType ||
       (columnType === "dates" && entry.activeColumn === "dates") ||
@@ -321,7 +406,7 @@ export default function SchengenVisaCalculator() {
     return styles
   }
 
-  const getColumnBorderStyles = (entry: VisaEntry, columnType: "country" | "dates" | "results") => {
+  const getColumnBorderStyles = (entry: VisaEntryLocal, columnType: "country" | "dates" | "results") => {
     const isActive =
       entry.activeColumn === columnType ||
       (columnType === "dates" && entry.activeColumn === "dates") ||
@@ -350,6 +435,23 @@ export default function SchengenVisaCalculator() {
   const totalDaysInLast180 = entries.reduce((sum, entry) => sum + entry.daysInLast180, 0)
   const totalDaysRemaining = Math.max(0, 90 - totalDaysInLast180)
 
+  // Show loading state
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F4F2ED" }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated
+  if (!user) {
+    return null
+  }
+
   return (
     <div className="min-h-screen font-['Onest',sans-serif]" style={{ backgroundColor: "#F4F2ED" }}>
       {/* Header */}
@@ -357,42 +459,41 @@ export default function SchengenVisaCalculator() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">Schengen Visa Calculator</h1>
+              <Link href="/dashboard">
+                <h1 className="text-xl font-semibold text-gray-900">Schengen Visa Calculator</h1>
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button className="bg-black hover:bg-gray-800 text-white transition-colors duration-200 px-8 py-2 rounded-full">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button
-                  className="text-white transition-colors duration-200 px-8 py-2 rounded-full hover:opacity-90"
-                  style={{ backgroundColor: "#FA9937" }}
-                >
-                  Sign Up
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>
+                  {profile?.first_name && profile?.last_name
+                    ? `${profile.first_name} ${profile.last_name}`
+                    : profile?.email}
+                </span>
+              </div>
+              <Button
+                onClick={signOut}
+                variant="outline"
+                className="flex items-center space-x-2 hover:bg-gray-50 transition-colors duration-200 bg-transparent rounded-full px-4"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      {/* Welcome Section */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Plan Smarter
-              <br />
-              Travel Easier
-            </h1>
-          </div>
-          <div>
-            <h2 className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Know Where You Can Go — Instantly See Visa Rules, Book Trips, and Travel Confidently.
-            </h2>
-          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}!
+          </h1>
+          <p className="text-lg text-gray-600">
+            Your visa calculations are automatically saved. Continue planning your travels below.
+          </p>
         </div>
       </section>
 
@@ -467,14 +568,16 @@ export default function SchengenVisaCalculator() {
                           <SelectValue placeholder="🇪🇺" />
                         </SelectTrigger>
                         <SelectContent>
-                          {schengenCountries.map((country) => (
-                            <SelectItem key={country.code} value={country.code}>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-lg">{country.flag}</span>
-                                <span>{country.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
+                          {countries
+                            .filter((country) => country.is_schengen)
+                            .map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-lg">{country.flag}</span>
+                                  <span>{country.name}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       {entry.activeColumn === "country" && (
@@ -553,20 +656,12 @@ export default function SchengenVisaCalculator() {
                                 variant="outline"
                                 className="flex-1 border-slate-300 text-slate-700 hover:bg-gray-50 bg-transparent"
                                 onClick={() => {
-                                  // Clear selection
                                   updateDateRange(entry.id, undefined)
                                 }}
                               >
                                 Clear
                               </Button>
-                              <Button
-                                className="flex-1 bg-slate-800 hover:bg-slate-700 text-white"
-                                onClick={() => {
-                                  // Close popover - this would be handled by the popover component
-                                }}
-                              >
-                                Done
-                              </Button>
+                              <Button className="flex-1 bg-slate-800 hover:bg-slate-700 text-white">Done</Button>
                             </div>
                           </div>
                         </PopoverContent>
@@ -632,35 +727,25 @@ export default function SchengenVisaCalculator() {
                   </div>
                 </div>
               )}
-
-              {/* Save Progress Section */}
-              {totalDays > 0 && (
-                <div className="border-t pt-6 mt-6">
-                  <div className="text-center">
-                    <div className="max-w-md mx-auto bg-gray-50 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Save Your Progress</h3>
-                      <Link href="/signup">
-                        <Button
-                          className="text-white px-8 py-3 rounded-full hover:opacity-90 font-medium"
-                          style={{ backgroundColor: "#FA9937" }}
-                        >
-                          Sign Up
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </section>
 
+      {/* Profile Completion Modal */}
+      {showProfileModal && profile && (
+        <ProfileCompletionModal
+          profile={profile}
+          countries={countries}
+          onComplete={handleProfileComplete}
+          onSkip={() => setShowProfileModal(false)}
+        />
+      )}
+
       {/* Footer */}
       <footer className="text-gray-900 py-12" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col space-y-8">
-            {/* Top section with logo and links */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
               <Button
                 variant="outline"
@@ -669,7 +754,6 @@ export default function SchengenVisaCalculator() {
                 Logo
               </Button>
 
-              {/* Legal Links */}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
                 <a
                   href="/legal-disclaimer"
@@ -689,7 +773,6 @@ export default function SchengenVisaCalculator() {
               </div>
             </div>
 
-            {/* Bottom section with copyright */}
             <div className="border-t border-gray-300 pt-6">
               <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
                 <div className="text-sm text-gray-600">© 2024 Schengen Visa Calculator. All rights reserved.</div>
