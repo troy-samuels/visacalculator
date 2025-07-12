@@ -1,7 +1,5 @@
 "use client"
 
-// Force cache bust - 2025-07-12-21-42 - Full featured calculator with auth
-
 import { useState, useEffect } from "react"
 import { Plus, Calendar, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,8 +9,6 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format, differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/hooks/useAuth"
 
 interface VisaEntry {
   id: string
@@ -177,15 +173,6 @@ export default function SchengenVisaCalculator() {
       activeColumn: "country",
     },
   ])
-
-  const { user, loading: authLoading } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      router.push("/dashboard")
-    }
-  }, [user, authLoading, router])
 
   const calculateDaysInLast180 = (startDate: Date, endDate: Date) => {
     const today = new Date()
