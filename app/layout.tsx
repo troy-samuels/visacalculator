@@ -1,13 +1,9 @@
 import { Inter } from "next/font/google"
-import type { Metadata } from "next"
 import "./globals.css"
-import { Toaster } from "@/components/ui/toaster"
-import { ErrorBoundary } from "@/components/error-boundary"
-import { CacheCheck } from "./cache-check"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Schengen Visa Calculator",
   description: "Calculate your Schengen visa days remaining",
 }
@@ -18,13 +14,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
-        <ErrorBoundary>
-          <CacheCheck />
-          <div id="root">{children}</div>
-          <Toaster />
-        </ErrorBoundary>
+        {children}
       </body>
     </html>
   )
