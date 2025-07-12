@@ -1,5 +1,7 @@
 "use client"
 
+// Force cache bust - 2025-07-12-21-42 - Full featured calculator with auth
+
 import { useState, useEffect } from "react"
 import { Plus, Calendar, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"

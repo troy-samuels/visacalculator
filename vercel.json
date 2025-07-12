@@ -10,6 +10,27 @@
   "env": {
     "VERCEL_ANALYTICS_ID": "",
     "VERCEL_SPEED_INSIGHTS_ID": "",
-    "VERCEL_WEB_ANALYTICS_ID": ""
-  }
+    "VERCEL_WEB_ANALYTICS_ID": "",
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1",
+    "DEPLOYMENT_ID": "2025-07-12-21-42"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
+    }
+  ]
 } 
