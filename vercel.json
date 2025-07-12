@@ -2,5 +2,14 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "analytics": false,
+  "speedInsights": false,
+  "webAnalytics": false,
+  "toolbar": false,
+  "env": {
+    "VERCEL_ANALYTICS_ID": "",
+    "VERCEL_SPEED_INSIGHTS_ID": "",
+    "VERCEL_WEB_ANALYTICS_ID": ""
+  }
 } 
