@@ -12,7 +12,7 @@
     "VERCEL_SPEED_INSIGHTS_ID": "",
     "VERCEL_WEB_ANALYTICS_ID": "",
     "VERCEL_FORCE_NO_BUILD_CACHE": "1",
-    "DEPLOYMENT_ID": "2025-07-12-21-42"
+    "DEPLOYMENT_ID": "2025-07-12-22-15-FORCE-CSS-REBUILD"
   },
   "headers": [
     {
@@ -40,5 +40,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "app/**/*.{js,ts,jsx,tsx}": {
+      "maxDuration": 10
+    }
+  }
 } 

@@ -3,9 +3,9 @@ export const revalidate = 0
 export async function GET() {
   return new Response(JSON.stringify({
     timestamp: new Date().toISOString(),
-    message: "Cache busted - fresh deployment active",
-    deployment: "2025-07-12-21-50",
-    version: "v2.0.0"
+    message: "FORCE CSS REBUILD - Fresh deployment with new CSS assets",
+    deployment: "2025-07-12-22-15-FORCE-CSS-REBUILD", 
+    version: "v2.1.0-CSS-FIX"
   }), {
     status: 200,
     headers: {
