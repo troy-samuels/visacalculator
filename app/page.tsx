@@ -448,6 +448,14 @@ export default function SchengenVisaCalculator() {
 
   return (
     <div className="min-h-screen font-['Onest',sans-serif]" style={{ backgroundColor: "#F4F2ED" }}>
+      <style jsx>{`
+        .blur-last-column {
+          filter: blur(4px);
+          transition: filter 0.3s ease;
+          pointer-events: none;
+        }
+      `}</style>
+      
       {/* Header */}
       <header className="shadow-sm border-b border-gray-200" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -513,7 +521,7 @@ export default function SchengenVisaCalculator() {
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900 text-sm">Days of Stay in the last 180 days</h3>
               </div>
-              <div className="text-center">
+              <div className={`text-center ${showSignupModal ? 'blur-last-column' : ''}`}>
                 <h3 className="font-semibold text-gray-900">Days Remaining</h3>
               </div>
             </div>
@@ -691,8 +699,8 @@ export default function SchengenVisaCalculator() {
                       </div>
                     </div>
 
-                    {/* Days Remaining with Progress Circle */}
-                    <div className={`${getColumnStyles(entry, "results")} rounded-lg p-2`}>
+                    {/* Days Remaining with Progress Circle - Apply blur when modal is open */}
+                    <div className={`${getColumnStyles(entry, "results")} rounded-lg p-2 ${showSignupModal ? 'blur-last-column' : ''}`}>
                       <div className="flex items-center justify-center h-20">
                         <ProgressCircle daysRemaining={totalDaysRemaining} size={80} />
                       </div>
@@ -721,7 +729,7 @@ export default function SchengenVisaCalculator() {
                       <span className="text-blue-900 font-semibold text-lg">
                         Total Days in Last 180 Days: {totalDaysInLast180} / 90
                       </span>
-                      <div className="text-sm text-blue-700 mt-1">
+                      <div className={`text-sm text-blue-700 mt-1 ${showSignupModal ? 'blur-last-column' : ''}`}>
                         Days Remaining: <AnimatedCounter value={totalDaysRemaining} />
                       </div>
                     </div>
