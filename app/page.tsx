@@ -9,6 +9,9 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format, differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
+import SignupModal from "@/components/signup-modal"
+import { useAuth } from "@/lib/hooks/useAuth"
+import { createClient } from "@/lib/supabase/client"
 
 interface VisaEntry {
   id: string
@@ -114,27 +117,30 @@ function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; 
     }
 
     requestAnimationFrame(animate)
-  }, [percentage])
+  }, [percentage, animatedProgress])
 
-  const radius = (size - 12) / 2
+  const radius = (size - 16) / 2
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (animatedProgress / 100) * circumference
 
-  // Color logic based on days remaining
   const getColor = () => {
-    if (daysRemaining > 60) return "#10B981" // Green
-    if (daysRemaining > 30) return "#F59E0B" // Yellow/Orange
-    if (daysRemaining > 10) return "#EF4444" // Red
-    return "#DC2626" // Dark Red
+    if (daysRemaining <= 0) return "#EF4444" // Red
+    if (daysRemaining <= 30) return "#F59E0B" // Amber
+    return "#10B981" // Green
   }
 
   return (
     <div className="flex items-center justify-center">
       <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="transform -rotate-90">
-          {/* Background circle */}
-          <circle cx={size / 2} cy={size / 2} r={radius} stroke="#E5E7EB" strokeWidth="8" fill="transparent" />
-          {/* Progress circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#E5E7EB"
+            strokeWidth="8"
+            fill="transparent"
+          />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -173,6 +179,87 @@ export default function SchengenVisaCalculator() {
       activeColumn: "country",
     },
   ])
+  
+  const [showSignupModal, setShowSignupModal] = useState(false)
+  const [hasTriggeredSignup, setHasTriggeredSignup] = useState(false)
+  const { user, loading: authLoading } = useAuth()
+  const supabase = createClient()
+
+  // Load user's visa entries when authenticated
+  useEffect(() => {
+    if (user && !authLoading) {
+      loadUserEntries()
+    }
+  }, [user, authLoading])
+
+  const loadUserEntries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("visa_entries")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: true })
+
+      if (error) {
+        console.error("Error loading entries:", error)
+        return
+      }
+
+      if (data && data.length > 0) {
+        const loadedEntries = data.map((entry, index) => ({
+          id: entry.id,
+          country: entry.country_code,
+          startDate: new Date(entry.start_date),
+          endDate: new Date(entry.end_date),
+          days: entry.days,
+          daysInLast180: 0, // Will be recalculated
+          daysRemaining: 90, // Will be recalculated
+          activeColumn: "complete" as const,
+        }))
+
+        updateAllEntries(loadedEntries)
+      }
+    } catch (error) {
+      console.error("Error loading entries:", error)
+    }
+  }
+
+  const saveUserEntries = async (entriesToSave: VisaEntry[]) => {
+    if (!user) return
+
+    try {
+      // First, delete existing entries for this user
+      await supabase
+        .from("visa_entries")
+        .delete()
+        .eq("user_id", user.id)
+
+      // Then insert new entries
+      const validEntries = entriesToSave.filter(entry => 
+        entry.country && entry.startDate && entry.endDate
+      )
+
+      if (validEntries.length > 0) {
+        const { error } = await supabase
+          .from("visa_entries")
+          .insert(
+            validEntries.map(entry => ({
+              user_id: user.id,
+              country_code: entry.country,
+              start_date: entry.startDate!.toISOString().split('T')[0],
+              end_date: entry.endDate!.toISOString().split('T')[0],
+              notes: null,
+            }))
+          )
+
+        if (error) {
+          console.error("Error saving entries:", error)
+        }
+      }
+    } catch (error) {
+      console.error("Error saving entries:", error)
+    }
+  }
 
   const calculateDaysInLast180 = (startDate: Date, endDate: Date) => {
     const today = new Date()
@@ -221,6 +308,21 @@ export default function SchengenVisaCalculator() {
     })
 
     setEntries(entriesWithRemaining)
+
+    // Auto-save for authenticated users
+    if (user) {
+      saveUserEntries(entriesWithRemaining)
+    }
+
+    // Check if we should show signup modal
+    if (!user && !hasTriggeredSignup && entriesWithRemaining.length >= 2) {
+      // Check if second entry has some data
+      const secondEntry = entriesWithRemaining[1]
+      if (secondEntry && (secondEntry.country || secondEntry.startDate)) {
+        setShowSignupModal(true)
+        setHasTriggeredSignup(true)
+      }
+    }
   }
 
   const addEntry = () => {
@@ -279,6 +381,11 @@ export default function SchengenVisaCalculator() {
     })
 
     updateAllEntries(updatedEntries)
+  }
+
+  const handleSignupSuccess = () => {
+    // Refresh auth state and load user entries
+    window.location.reload()
   }
 
   const getColumnStyles = (entry: VisaEntry, columnType: "country" | "dates" | "results") => {
@@ -690,6 +797,8 @@ export default function SchengenVisaCalculator() {
           </div>
         </div>
       </footer>
+
+      {showSignupModal && <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} onSuccess={handleSignupSuccess} />}
     </div>
   )
 }
