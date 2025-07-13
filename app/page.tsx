@@ -454,6 +454,33 @@ export default function SchengenVisaCalculator() {
           transition: filter 0.3s ease;
           pointer-events: none;
         }
+        
+        /* Calendar range styling */
+        .calendar-range-middle {
+          position: relative;
+        }
+        
+        .calendar-range-middle::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 40px;
+          background-color: #f3f4f6;
+          transform: translateY(-50%);
+          z-index: -1;
+        }
+        
+        .calendar-selected-date {
+          background-color: #111827 !important;
+          color: white !important;
+          font-weight: 600;
+        }
+        
+        .calendar-selected-date:hover {
+          background-color: #1f2937 !important;
+        }
       `}</style>
       
       {/* Header */}
@@ -604,9 +631,9 @@ export default function SchengenVisaCalculator() {
                               {!entry.country
                                 ? "Select country first"
                                 : entry.startDate && entry.endDate
-                                  ? `${format(entry.startDate, "MMM dd")} - ${format(entry.endDate, "MMM dd")}`
+                                  ? `${format(entry.startDate, "dd MMM yyyy")} - ${format(entry.endDate, "dd MMM yyyy")}`
                                   : entry.startDate
-                                    ? `${format(entry.startDate, "MMM dd")} - End date`
+                                    ? `${format(entry.startDate, "dd MMM yyyy")} - End date`
                                     : "Select dates"}
                             </span>
                           </Button>
@@ -636,40 +663,36 @@ export default function SchengenVisaCalculator() {
                                 head_row: "flex mb-2",
                                 head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
                                 row: "flex w-full mt-2",
-                                cell: "text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-lg transition-colors",
+                                cell: "text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+                                day: "h-10 w-10 p-0 font-normal transition-colors relative flex items-center justify-center rounded-full hover:bg-gray-100",
                                 day_range_start:
-                                  "day-range-start bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                  "bg-gray-900 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-full font-semibold",
                                 day_range_end:
-                                  "day-range-end bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                  "bg-gray-900 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-full font-semibold",
                                 day_selected:
-                                  "bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
-                                day_today: "bg-gray-100 text-gray-900 font-semibold",
+                                  "bg-gray-900 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-full font-semibold",
+                                day_today: "bg-gray-100 text-gray-900 font-semibold rounded-full",
                                 day_outside: "text-gray-400 opacity-50",
                                 day_disabled: "text-gray-400 opacity-50",
                                 day_range_middle:
-                                  "aria-selected:bg-slate-100 aria-selected:text-slate-900 hover:bg-slate-100",
+                                  "aria-selected:bg-gray-100 aria-selected:text-gray-900 hover:bg-gray-100 rounded-none",
                                 day_hidden: "invisible",
                               }}
                             />
-                            <div className="flex gap-3 mt-6 pt-4 border-t">
+                            <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                              <div className="flex items-center space-x-2">
+                                <div className="p-2 bg-gray-100 rounded-lg">
+                                  <Calendar className="h-4 w-4 text-gray-600" />
+                                </div>
+                              </div>
                               <Button
                                 variant="outline"
-                                className="flex-1 border-slate-300 text-slate-700 hover:bg-gray-50 bg-transparent"
+                                className="text-gray-700 hover:bg-gray-50 bg-transparent border-0 underline hover:no-underline"
                                 onClick={() => {
-                                  // Clear selection
                                   updateDateRange(entry.id, undefined)
                                 }}
                               >
-                                Clear
-                              </Button>
-                              <Button
-                                className="flex-1 bg-slate-800 hover:bg-slate-700 text-white"
-                                onClick={() => {
-                                  // Close popover - this would be handled by the popover component
-                                }}
-                              >
-                                Done
+                                Clear dates
                               </Button>
                             </div>
                           </div>
