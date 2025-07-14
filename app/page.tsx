@@ -316,9 +316,13 @@ export default function SchengenVisaCalculator() {
 
     // Check if we should show signup modal
     if (!user && !hasTriggeredSignup && entriesWithRemaining.length >= 2) {
-      // Check if second entry has some data
-      const secondEntry = entriesWithRemaining[1]
-      if (secondEntry && (secondEntry.country || secondEntry.startDate)) {
+      // Check if second entry or any subsequent entry has dates entered
+      const entriesWithDates = entriesWithRemaining.slice(1); // Skip first entry
+      const hasEntryWithDates = entriesWithDates.some(entry => 
+        entry.startDate && entry.endDate
+      );
+      
+      if (hasEntryWithDates) {
         setShowSignupModal(true)
         setHasTriggeredSignup(true)
       }
