@@ -9,8 +9,11 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format, differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import SignupModal from "@/components/signup-modal"
+import PrivacyNotice from "@/components/privacy-notice"
 import { useAuth } from "@/lib/hooks/useAuth"
+import { useAnalytics } from "@/lib/hooks/useAnalytics"
 import { createClient } from "@/lib/supabase/client"
 
 interface VisaEntry {
@@ -182,8 +185,22 @@ export default function SchengenVisaCalculator() {
   
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [hasTriggeredSignup, setHasTriggeredSignup] = useState(false)
-  const { user, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
+  const { trackCalculation, trackDestinationSelected, trackDateSelected, trackPageView } = useAnalytics()
   const supabase = createClient()
+  const router = useRouter()
+
+  // Track page view on component mount
+  useEffect(() => {
+    trackPageView()
+  }, [trackPageView])
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push("/dashboard")
+    }
+  }, [user, authLoading, router])
 
   // Load user's visa entries when authenticated
   useEffect(() => {
@@ -309,6 +326,20 @@ export default function SchengenVisaCalculator() {
 
     setEntries(entriesWithRemaining)
 
+    // Track calculation if we have complete data
+    const completedEntries = entriesWithRemaining.filter(entry => 
+      entry.country && entry.startDate && entry.endDate
+    )
+    
+    if (completedEntries.length > 0) {
+      const homeCountry = profile?.home_country || user?.user_metadata?.home_country
+      const totalDaysRemaining = Math.max(0, 90 - totalDaysInLast180)
+      
+      // Track the calculation with the most recent destination
+      const latestEntry = completedEntries[completedEntries.length - 1]
+      trackCalculation(latestEntry.country, homeCountry || '', totalDaysRemaining)
+    }
+
     // Auto-save for authenticated users
     if (user) {
       saveUserEntries(entriesWithRemaining)
@@ -348,6 +379,12 @@ export default function SchengenVisaCalculator() {
       if (entry.id === id) {
         const updatedEntry = { ...entry, [field]: value }
 
+        // Track destination selection
+        if (field === "country" && value && value !== entry.country) {
+          const homeCountry = profile?.home_country || user?.user_metadata?.home_country
+          trackDestinationSelected(value, homeCountry || '')
+        }
+
         // Calculate days when both dates are selected
         if (field === "startDate" || field === "endDate") {
           if (updatedEntry.startDate && updatedEntry.endDate) {
@@ -375,6 +412,10 @@ export default function SchengenVisaCalculator() {
         // Calculate days when both dates are selected
         if (updatedEntry.startDate && updatedEntry.endDate) {
           updatedEntry.days = differenceInDays(updatedEntry.endDate, updatedEntry.startDate) + 1
+          
+          // Track date selection
+          const homeCountry = profile?.home_country || user?.user_metadata?.home_country
+          trackDateSelected(updatedEntry.country, updatedEntry.days, homeCountry || '')
         } else {
           updatedEntry.days = 0
         }
@@ -834,6 +875,7 @@ export default function SchengenVisaCalculator() {
       </footer>
 
       {showSignupModal && <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} onSuccess={handleSignupSuccess} />}
+      <PrivacyNotice />
     </div>
   )
 }

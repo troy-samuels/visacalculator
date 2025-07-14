@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
+import { useAnalytics } from "@/lib/hooks/useAnalytics"
 import { useRouter } from "next/navigation"
 
 interface SignupModalProps {
@@ -58,6 +59,7 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
   })
 
   const supabase = createClient()
+  const { trackSignup } = useAnalytics()
   const router = useRouter()
 
   // Reset form when modal opens
@@ -132,6 +134,9 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
           setMessage({ type: "error", text: error.message })
         }
       } else {
+        // Track successful signup (anonymized)
+        trackSignup(formData.homeCountry)
+        
         // Success - user created and logged in
         setMessage({
           type: "success",
@@ -160,19 +165,19 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       {/* Modal content - centered on screen */}
-      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+      <div className="relative z-10 w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style={{ backgroundColor: "#F4F2ED" }}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-white">
+        <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: "#F4F2ED" }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">Save Your Calculations</h2>
+            <h2 className="text-xl font-bold text-gray-900">Save Your Calculations</h2>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-white/20 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-600 hover:text-gray-900"
             >
               <X size={20} />
             </button>
           </div>
-          <p className="text-blue-100 text-sm mt-1">
+          <p className="text-gray-600 text-sm mt-1">
             Create an account to save and access your visa calculations anytime
           </p>
         </div>
@@ -193,7 +198,7 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
                   placeholder="John"
-                  className="pl-10"
+                  className="pl-10 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
                   disabled={loading}
                 />
               </div>
@@ -208,6 +213,7 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                 placeholder="Doe"
+                className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
                 disabled={loading}
               />
             </div>
@@ -226,7 +232,7 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="john@example.com"
-                className="pl-10"
+                className="pl-10 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
                 disabled={loading}
               />
             </div>
@@ -238,13 +244,13 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
               Home Country *
             </label>
             <Select value={formData.homeCountry} onValueChange={(value) => handleInputChange("homeCountry", value)} disabled={loading}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-gray-400" />
                   <SelectValue placeholder="Select your home country" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border-gray-200">
                 {countries.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
                     <div className="flex items-center gap-2">
@@ -261,8 +267,8 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
           {message && (
             <div className={`p-3 rounded-lg text-sm ${
               message.type === "error" 
-                ? "bg-red-50 text-red-700 border border-red-200" 
-                : "bg-green-50 text-green-700 border border-green-200"
+                ? "bg-red-50 text-red-800 border border-red-200" 
+                : "bg-green-50 text-green-800 border border-green-200"
             }`}>
               {message.text}
             </div>
@@ -275,14 +281,15 @@ export default function SignupModal({ isOpen, onClose, onSuccess }: SignupModalP
               variant="outline"
               onClick={handleSkip}
               disabled={loading}
-              className="flex-1"
+              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
             >
               Skip for now
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="flex-1 text-white hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: "#FA9937" }}
             >
               {loading ? (
                 <>

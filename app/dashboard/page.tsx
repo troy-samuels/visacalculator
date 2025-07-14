@@ -464,6 +464,13 @@ export default function DashboardPage() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
+              {profile?.is_admin && (
+                <Link href="/admin/analytics">
+                  <Button variant="outline" className="text-sm">
+                    Analytics
+                  </Button>
+                </Link>
+              )}
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <User className="w-4 h-4" />
                 <span>
