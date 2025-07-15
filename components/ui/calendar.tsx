@@ -6,7 +6,6 @@ import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import "./calendar-airbnb.css";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -19,53 +18,44 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("airbnb-calendar p-0 w-auto", className)}
+      className={cn("p-3", className)}
       classNames={{
-        months: "flex flex-row gap-16 justify-center airbnb-months",
-        month: "space-y-6 min-w-0 airbnb-month",
-        caption: "flex justify-center items-center mb-6 airbnb-caption relative",
-        caption_label: "text-2xl font-bold text-gray-900 airbnb-caption-label",
-        nav: "flex items-center airbnb-nav absolute w-full justify-between top-1 left-0 px-2",
+        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+        month: "space-y-4",
+        caption: "flex justify-center pt-1 relative items-center",
+        caption_label: "text-lg font-semibold text-gray-900",
+        nav: "space-x-1 flex items-center",
         nav_button: cn(
-          "h-10 w-10 bg-transparent hover:bg-gray-100 border-0 rounded-full flex items-center justify-center transition-all duration-200 text-gray-700 airbnb-nav-btn"
+          buttonVariants({ variant: "outline" }),
+          "h-8 w-8 bg-transparent p-0 opacity-80 hover:opacity-100"
         ),
-        nav_button_previous: "airbnb-nav-prev",
-        nav_button_next: "airbnb-nav-next",
-        table: "w-full border-collapse airbnb-table",
-        head_row: "flex mb-2 airbnb-head-row",
-        head_cell: "text-gray-500 font-semibold text-base text-center w-12 h-12 airbnb-head-cell",
-        row: "flex w-full airbnb-row",
-        cell: cn(
-          "relative p-0 text-center text-base focus-within:relative focus-within:z-20 airbnb-cell",
-          "[&:has([aria-selected])]:bg-transparent"
-        ),
+        nav_button_previous: "absolute left-1",
+        nav_button_next: "absolute right-1",
+        table: "w-full border-collapse space-y-1",
+        head_row: "flex",
+        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        row: "flex w-full mt-2",
+        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
-          "h-12 w-12 p-0 font-medium relative rounded-full hover:bg-gray-100 transition-all duration-200 flex items-center justify-center text-base airbnb-day",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-          "disabled:text-gray-300 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          buttonVariants({ variant: "ghost" }),
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
-        day_range_start: cn(
-          "bg-black text-white rounded-full font-bold airbnb-range-start"
-        ),
-        day_range_end: cn(
-          "bg-black text-white rounded-full font-bold airbnb-range-end"
-        ),
-        day_selected: cn(
-          "bg-black text-white rounded-full font-bold airbnb-selected"
-        ),
-        day_today: "border-2 border-black text-black font-bold airbnb-today",
-        day_outside: "text-gray-300 opacity-60 airbnb-outside",
-        day_disabled: "text-gray-200 opacity-30 cursor-not-allowed airbnb-disabled",
-        day_range_middle: cn(
-          "bg-gray-100 text-black rounded-none airbnb-range-middle",
-          "airbnb-range-middle-pill"
-        ),
-        day_hidden: "invisible airbnb-hidden",
+        day_range_start: "day-range-start",
+        day_range_end: "day-range-end",
+        day_selected:
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_today: "bg-accent text-accent-foreground",
+        day_outside:
+          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+        day_disabled: "text-muted-foreground opacity-50",
+        day_range_middle:
+          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_hidden: "invisible",
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-6 w-6 text-gray-700" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-6 w-6 text-gray-700" />,
+        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
       {...props}
     />
