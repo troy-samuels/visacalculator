@@ -533,7 +533,11 @@ export default function SchengenVisaCalculator() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">Schengen Visa Calculator</h1>
+              <img 
+                src="/visa-calculator-logo.svg" 
+                alt="Visa Calculator" 
+                className="h-8 w-auto"
+              />
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/login">
@@ -821,12 +825,15 @@ export default function SchengenVisaCalculator() {
           <div className="flex flex-col space-y-8">
             {/* Top section with logo and links */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
-              <Button
-                variant="outline"
-                className="bg-gray-200 border-gray-300 text-gray-900 hover:bg-gray-300 rounded-full px-6"
-              >
-                Logo
-              </Button>
+              <div className="flex items-center">
+                <Link href="/">
+                  <img 
+                    src="/visa-calculator-logo.svg" 
+                    alt="Visa Calculator" 
+                    className="h-10 w-auto"
+                  />
+                </Link>
+              </div>
 
               {/* Legal Links */}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
