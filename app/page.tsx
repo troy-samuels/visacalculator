@@ -500,32 +500,7 @@ export default function SchengenVisaCalculator() {
           pointer-events: none;
         }
         
-        /* Calendar range styling */
-        .calendar-range-middle {
-          position: relative;
-        }
-        
-        .calendar-range-middle::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 0;
-          right: 0;
-          height: 40px;
-          background-color: #f3f4f6;
-          transform: translateY(-50%);
-          z-index: -1;
-        }
-        
-        .calendar-selected-date {
-          background-color: #111827 !important;
-          color: white !important;
-          font-weight: 600;
-        }
-        
-        .calendar-selected-date:hover {
-          background-color: #1f2937 !important;
-        }
+
       `}</style>
       
       {/* Header */}
