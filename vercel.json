@@ -8,7 +8,7 @@
   "trailingSlash": false,
   "env": {
     "FORCE_FRESH_DEPLOYMENT": "true",
-    "DEPLOYMENT_TIMESTAMP": "2025-07-15-20-15-DEEP-CLEAN-CALENDAR"
+    "DEPLOYMENT_TIMESTAMP": "2025-07-15-22-40-ULTIMATE-CACHE-NUKE"
   },
   "headers": [
     {
@@ -16,7 +16,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0"
         },
         {
           "key": "Pragma", 
@@ -32,7 +32,11 @@
         },
         {
           "key": "X-Deployment-Timestamp",
-          "value": "NUCLEAR-CACHE-BUST-2025-01-15-22:30"
+          "value": "ULTIMATE-CACHE-NUKE-2025-01-15-22:40"
+        },
+        {
+          "key": "Vary",
+          "value": "Accept-Encoding"
         }
       ]
     },
@@ -41,7 +45,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, max-age=0"
+          "value": "no-store, no-cache, must-revalidate, max-age=0, s-maxage=0"
         }
       ]
     }

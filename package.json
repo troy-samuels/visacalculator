@@ -3,10 +3,11 @@
   "version": "3.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
     "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
-    "start": "next start"
+    "cache-nuke": "rm -rf .next node_modules/.cache .vercel && npm cache clean --force && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
