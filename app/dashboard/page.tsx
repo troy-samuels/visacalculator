@@ -501,7 +501,7 @@ export default function DashboardPage() {
                 <h3 className="font-semibold text-gray-900">Country</h3>
               </div>
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900">Date Range</h3>
+                <h3 className="font-semibold text-gray-900">Travel Dates</h3>
               </div>
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900">Days of Stay</h3>
@@ -578,34 +578,35 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-                    {/* Start Date */}
+                    {/* Travel Dates */}
                     <div
-                      className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
+                      className={`${getColumnStyles(entry, "dates")} rounded-xl p-5 ${getColumnBorderStyles(entry, "dates")} bg-white shadow-sm`}
                     >
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-2">Start Date</label>
+                          <label className="block text-sm font-semibold text-gray-800 mb-3">Start Date</label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  "w-full justify-start font-normal text-left h-10",
-                                  !entry.startDate && "text-muted-foreground"
+                                  "w-full justify-start font-medium text-left h-12 px-4 bg-white border border-gray-300 rounded-xl hover:border-gray-400 hover:shadow-sm transition-all duration-200",
+                                  !entry.startDate && "text-gray-500",
+                                  entry.startDate && "text-gray-900 border-gray-400"
                                 )}
                                 disabled={!entry.country}
                               >
-                                <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">
+                                <Calendar className="mr-3 h-4 w-4 flex-shrink-0 text-gray-600" />
+                                <span className="truncate text-base">
                                   {!entry.country
                                     ? "Select country first"
                                     : entry.startDate
-                                      ? format(entry.startDate, "PPP")
-                                      : "Pick a start date"}
+                                      ? format(entry.startDate, "EEE, MMM d")
+                                      : "Add date"}
                                 </span>
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent className="w-auto p-0 border-0 shadow-xl rounded-2xl" align="start">
                               <CalendarComponent
                                 mode="single"
                                 selected={entry.startDate || undefined}
@@ -618,30 +619,31 @@ export default function DashboardPage() {
                         </div>
                         
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-2">End Date</label>
+                          <label className="block text-sm font-semibold text-gray-800 mb-3">End Date</label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  "w-full justify-start font-normal text-left h-10",
-                                  !entry.endDate && "text-muted-foreground"
+                                  "w-full justify-start font-medium text-left h-12 px-4 bg-white border border-gray-300 rounded-xl hover:border-gray-400 hover:shadow-sm transition-all duration-200",
+                                  !entry.endDate && "text-gray-500",
+                                  entry.endDate && "text-gray-900 border-gray-400"
                                 )}
                                 disabled={!entry.country || !entry.startDate}
                               >
-                                <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">
+                                <Calendar className="mr-3 h-4 w-4 flex-shrink-0 text-gray-600" />
+                                <span className="truncate text-base">
                                   {!entry.country
                                     ? "Select country first"
                                     : !entry.startDate
-                                      ? "Pick start date first"
+                                      ? "Select start date first"
                                       : entry.endDate
-                                        ? format(entry.endDate, "PPP")
-                                        : "Pick an end date"}
+                                        ? format(entry.endDate, "EEE, MMM d")
+                                        : "Add date"}
                                 </span>
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent className="w-auto p-0 border-0 shadow-xl rounded-2xl" align="start">
                               <CalendarComponent
                                 mode="single"
                                 selected={entry.endDate || undefined}
@@ -656,11 +658,25 @@ export default function DashboardPage() {
                             </PopoverContent>
                           </Popover>
                         </div>
+                        
+                        {/* Date Summary */}
+                        {entry.startDate && entry.endDate && (
+                          <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                            <div className="text-center">
+                              <div className="text-sm font-semibold text-gray-900">
+                                {format(entry.startDate, "MMM d")} → {format(entry.endDate, "MMM d, yyyy")}
+                              </div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                {entry.days} {entry.days === 1 ? 'day' : 'days'} total
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
                       {entry.activeColumn === "dates" && (
-                        <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
-                          {!entry.country ? "Select a country first" : "Select your travel dates"}
+                        <div className="text-xs text-blue-600 mt-3 text-center font-medium relative z-10">
+                          {!entry.country ? "Select a country first" : "Choose your travel dates"}
                         </div>
                       )}
                     </div>
