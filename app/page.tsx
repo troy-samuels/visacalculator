@@ -683,8 +683,8 @@ export default function SchengenVisaCalculator() {
                             </span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0" align="start">
-                          <div className="p-6">
+                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
+                          <div className="p-8">
                             <CalendarComponent
                               mode="range"
                               selected={{
@@ -693,52 +693,39 @@ export default function SchengenVisaCalculator() {
                               }}
                               onSelect={(range) => updateDateRange(entry.id, range)}
                               numberOfMonths={2}
-                              className="rounded-none border-0"
-                              classNames={{
-                                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                                month: "space-y-4",
-                                caption: "flex justify-center pt-1 relative items-center mb-4",
-                                caption_label: "text-lg font-semibold text-gray-900",
-                                nav: "space-x-1 flex items-center",
-                                nav_button:
-                                  "h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors",
-                                nav_button_previous: "absolute left-0",
-                                nav_button_next: "absolute right-0",
-                                table: "w-full border-collapse space-y-1",
-                                head_row: "flex mb-2",
-                                head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
-                                row: "flex w-full mt-2",
-                                cell: "text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-                                day: "h-10 w-10 p-0 font-normal transition-colors relative flex items-center justify-center rounded-full hover:bg-gray-100",
-                                day_range_start:
-                                  "bg-gray-900 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-full font-semibold",
-                                day_range_end:
-                                  "bg-gray-900 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-full font-semibold",
-                                day_selected:
-                                  "bg-gray-900 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-full font-semibold",
-                                day_today: "bg-gray-100 text-gray-900 font-semibold rounded-full",
-                                day_outside: "text-gray-400 opacity-50",
-                                day_disabled: "text-gray-400 opacity-50",
-                                day_range_middle:
-                                  "aria-selected:bg-gray-100 aria-selected:text-gray-900 hover:bg-gray-100 rounded-none",
-                                day_hidden: "invisible",
-                              }}
+                              className="border-0"
                             />
-                            <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                              <div className="flex items-center space-x-2">
-                                <div className="p-2 bg-gray-100 rounded-lg">
-                                  <Calendar className="h-4 w-4 text-gray-600" />
+                            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+                              <div className="flex items-center space-x-3">
+                                <div className="p-2.5 bg-gray-50 rounded-xl">
+                                  <Calendar className="h-4 w-4 text-gray-500" />
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {entry.startDate && entry.endDate 
+                                    ? `${differenceInDays(entry.endDate, entry.startDate) + 1} nights`
+                                    : "Select dates"
+                                  }
                                 </div>
                               </div>
-                              <Button
-                                variant="outline"
-                                className="text-gray-700 hover:bg-gray-50 bg-transparent border-0 underline hover:no-underline"
-                                onClick={() => {
-                                  updateDateRange(entry.id, undefined)
-                                }}
-                              >
-                                Clear dates
-                              </Button>
+                              <div className="flex gap-3">
+                                <Button
+                                  variant="outline"
+                                  className="text-gray-600 hover:bg-gray-50 bg-white border-gray-200 hover:border-gray-300 transition-all duration-200"
+                                  onClick={() => {
+                                    updateDateRange(entry.id, undefined)
+                                  }}
+                                >
+                                  Clear dates
+                                </Button>
+                                <Button 
+                                  className="bg-gray-900 hover:bg-gray-800 text-white border-0 shadow-sm transition-all duration-200"
+                                  onClick={() => {
+                                    // Close popover - this will be handled by the popover itself
+                                  }}
+                                >
+                                  Done
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </PopoverContent>

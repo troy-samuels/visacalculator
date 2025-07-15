@@ -617,8 +617,8 @@ export default function DashboardPage() {
                             </span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0" align="start">
-                          <div className="p-6">
+                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
+                          <div className="p-8">
                             <CalendarComponent
                               mode="range"
                               selected={{
@@ -627,48 +627,39 @@ export default function DashboardPage() {
                               }}
                               onSelect={(range) => updateDateRange(entry.id, range)}
                               numberOfMonths={2}
-                              className="rounded-none border-0"
-                              classNames={{
-                                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                                month: "space-y-4",
-                                caption: "flex justify-center pt-1 relative items-center mb-4",
-                                caption_label: "text-lg font-semibold text-gray-900",
-                                nav: "space-x-1 flex items-center",
-                                nav_button:
-                                  "h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors",
-                                nav_button_previous: "absolute left-0",
-                                nav_button_next: "absolute right-0",
-                                table: "w-full border-collapse space-y-1",
-                                head_row: "flex mb-2",
-                                head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
-                                row: "flex w-full mt-2",
-                                cell: "text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-lg transition-colors",
-                                day_range_start:
-                                  "day-range-start bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
-                                day_range_end:
-                                  "day-range-end bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
-                                day_selected:
-                                  "bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
-                                day_today: "bg-gray-100 text-gray-900 font-semibold",
-                                day_outside: "text-gray-400 opacity-50",
-                                day_disabled: "text-gray-400 opacity-50",
-                                day_range_middle:
-                                  "aria-selected:bg-slate-100 aria-selected:text-slate-900 hover:bg-slate-100",
-                                day_hidden: "invisible",
-                              }}
+                              className="border-0"
                             />
-                            <div className="flex gap-3 mt-6 pt-4 border-t">
-                              <Button
-                                variant="outline"
-                                className="flex-1 border-slate-300 text-slate-700 hover:bg-gray-50 bg-transparent"
-                                onClick={() => {
-                                  updateDateRange(entry.id, undefined)
-                                }}
-                              >
-                                Clear
-                              </Button>
-                              <Button className="flex-1 bg-slate-800 hover:bg-slate-700 text-white">Done</Button>
+                            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+                              <div className="flex items-center space-x-3">
+                                <div className="p-2.5 bg-gray-50 rounded-xl">
+                                  <Calendar className="h-4 w-4 text-gray-500" />
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {entry.startDate && entry.endDate 
+                                    ? `${differenceInDays(entry.endDate, entry.startDate) + 1} nights`
+                                    : "Select dates"
+                                  }
+                                </div>
+                              </div>
+                              <div className="flex gap-3">
+                                <Button
+                                  variant="outline"
+                                  className="text-gray-600 hover:bg-gray-50 bg-white border-gray-200 hover:border-gray-300 transition-all duration-200"
+                                  onClick={() => {
+                                    updateDateRange(entry.id, undefined)
+                                  }}
+                                >
+                                  Clear dates
+                                </Button>
+                                <Button 
+                                  className="bg-gray-900 hover:bg-gray-800 text-white border-0 shadow-sm transition-all duration-200"
+                                  onClick={() => {
+                                    // Close popover - this will be handled by the popover itself
+                                  }}
+                                >
+                                  Done
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </PopoverContent>
