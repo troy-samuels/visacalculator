@@ -48,6 +48,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -93,29 +94,16 @@ body {
   }
 }
 
-/* Simple Calendar Styling - Airbnb Style */
-.calendar-airbnb-container button[aria-selected="true"] {
-  background-color: #111827 !important;
-  color: white !important;
-  border-radius: 50% !important;
-  font-weight: 600 !important;
+/* Privacy blur effect */
+.blur-last-column {
+  filter: blur(4px);
+  pointer-events: none;
 }
 
-.calendar-airbnb-container button[name="day"] {
-  height: 56px !important;
-  width: 56px !important;
-  border-radius: 50% !important;
-  font-size: 16px !important;
-  border: none !important;
+/* Signup modal backdrop */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
 }
 
-.calendar-airbnb-container button[name="day"]:hover {
-  background-color: #f3f4f6 !important;
-  color: #111827 !important;
-}
 
-.calendar-airbnb-container .rdp-caption_label {
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
-  color: #111827 !important;
-}
