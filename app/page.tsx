@@ -1,5 +1,9 @@
 "use client"
 
+// Force dynamic rendering and disable all caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { useState, useEffect } from "react"
 import { Plus, Calendar, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
