@@ -400,13 +400,39 @@ export default function SchengenVisaCalculator() {
     updateAllEntries(updatedEntries)
   }
 
-  const updateDateRange = (id: string, dateRange: DateRange | undefined) => {
+  const updateStartDate = (id: string, date: Date | undefined) => {
     const updatedEntries = entries.map((entry) => {
       if (entry.id === id) {
         const updatedEntry = {
           ...entry,
-          startDate: dateRange?.from || null,
-          endDate: dateRange?.to || null,
+          startDate: date || null,
+        }
+
+        // Calculate days when both dates are selected
+        if (updatedEntry.startDate && updatedEntry.endDate) {
+          updatedEntry.days = differenceInDays(updatedEntry.endDate, updatedEntry.startDate) + 1
+          
+          // Track date selection
+          const homeCountry = profile?.home_country || user?.user_metadata?.home_country
+          trackDateSelected(updatedEntry.country, updatedEntry.days, homeCountry || '')
+        } else {
+          updatedEntry.days = 0
+        }
+
+        return updatedEntry
+      }
+      return entry
+    })
+
+    updateAllEntries(updatedEntries)
+  }
+
+  const updateEndDate = (id: string, date: Date | undefined) => {
+    const updatedEntries = entries.map((entry) => {
+      if (entry.id === id) {
+        const updatedEntry = {
+          ...entry,
+          endDate: date || null,
         }
 
         // Calculate days when both dates are selected
@@ -556,16 +582,19 @@ export default function SchengenVisaCalculator() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
             {/* Column Headers */}
-            <div
-              className="grid gap-4 p-6 bg-gray-50 border-b"
-              style={{ gridTemplateColumns: "1fr 2fr 1.2fr 1.5fr 1fr" }}
-            >
-              <div className="text-center">
-                <h3 className="font-semibold text-gray-900">Country</h3>
-              </div>
-              <div className="text-center">
-                <h3 className="font-semibold text-gray-900">Date Range</h3>
-              </div>
+                          <div
+                className="grid gap-4 p-6 bg-gray-50 border-b"
+                style={{ gridTemplateColumns: "1fr 1fr 1fr 1.2fr 1.5fr 1fr" }}
+              >
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900">Country</h3>
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900">Start Date</h3>
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900">End Date</h3>
+                </div>
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900">Days of Stay</h3>
               </div>
@@ -612,7 +641,7 @@ export default function SchengenVisaCalculator() {
                     />
                   </div>
 
-                  <div className="grid gap-6 items-center" style={{ gridTemplateColumns: "1fr 2fr 1.2fr 1.5fr 1fr" }}>
+                  <div className="grid gap-6 items-center" style={{ gridTemplateColumns: "1fr 1fr 1fr 1.2fr 1.5fr 1fr" }}>
                     {/* Country Selection */}
                     <div
                       className={`${getColumnStyles(entry, "country")} rounded-lg p-4 ${getColumnBorderStyles(entry, "country")}`}
@@ -670,7 +699,10 @@ export default function SchengenVisaCalculator() {
                                 from: entry.startDate || undefined,
                                 to: entry.endDate || undefined,
                               }}
-                              onSelect={(range) => updateDateRange(entry.id, range)}
+                              onSelect={(range) => {
+                                updateStartDate(entry.id, range?.from);
+                                updateEndDate(entry.id, range?.to);
+                              }}
                               numberOfMonths={2}
                               className="border-0"
                             />
@@ -691,7 +723,8 @@ export default function SchengenVisaCalculator() {
                                   variant="outline"
                                   className="text-gray-600 hover:bg-gray-50 bg-white border-gray-200 hover:border-gray-300 transition-all duration-200"
                                   onClick={() => {
-                                    updateDateRange(entry.id, undefined)
+                                    updateStartDate(entry.id, undefined);
+                                    updateEndDate(entry.id, undefined);
                                   }}
                                 >
                                   Clear dates
