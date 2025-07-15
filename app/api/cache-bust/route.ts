@@ -1,20 +1,29 @@
-export const revalidate = 0
+import { NextResponse } from 'next/server'
 
 export async function GET() {
-  return new Response(JSON.stringify({
-    timestamp: new Date().toISOString(),
-    message: "🚨 NUCLEAR DEPLOYMENT - Complete fresh rebuild with working folder code",
-    deployment: "2025-07-12-21-30-NUCLEAR-OPTION", 
-    version: "v3.0.0-WORKING-FOLDER-MATCH",
-    cacheBust: Date.now()
-  }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'Surrogate-Control': 'no-store'
+  const timestamp = Date.now()
+  const cacheBustId = `CALENDAR-FIX-${timestamp}`
+  
+  return NextResponse.json(
+    { 
+      success: true, 
+      timestamp,
+      cacheBustId,
+      message: 'Cache cleared successfully',
+      deployment: 'PRODUCTION-CALENDAR-FIX-2025-01-15'
+    },
+    {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Cache-Bust': cacheBustId,
+        'X-Timestamp': timestamp.toString(),
+      },
     }
-  })
+  )
+}
+
+export async function POST() {
+  return GET()
 } 

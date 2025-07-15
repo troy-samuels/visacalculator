@@ -1,18 +1,46 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev", 
-  "installCommand": "npm install --legacy-peer-deps",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "outputDirectory": ".next",
-  "cleanUrls": true,
-  "trailingSlash": false,
+  "functions": {
+    "app/api/cache-bust/route.ts": {
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "no-cache, no-store, must-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        },
+        {
+          "key": "X-Cache-Bust",
+          "value": "CALENDAR-FIX-2025-01-15-22:45"
+        },
+        {
+          "key": "X-Force-Refresh",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate, max-age=0"
         }
       ]
     }
