@@ -1,12 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Calendar, ChevronRight } from "lucide-react"
+import { Plus, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { format, differenceInDays, subDays } from "date-fns"
+import { differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -672,35 +670,26 @@ export default function SchengenVisaCalculator() {
                     <div
                       className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
                     >
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-center text-center font-normal bg-white h-12 text-sm px-4 border-0 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={!entry.country}
-                          >
-                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">
-                              {!entry.country
-                                ? "Select country first"
-                                : entry.startDate
-                                  ? format(entry.startDate, "dd MMM yyyy")
-                                  : "Start date"}
-                            </span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
-                          <div className="p-6">
-                            <CalendarComponent
-                              mode="single"
-                              selected={entry.startDate || undefined}
-                              onSelect={(date) => updateStartDate(entry.id, date)}
-                              disabled={(date) => date < new Date() || (entry.endDate && date > entry.endDate)}
-                              className="border-0"
-                            />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={entry.startDate ? entry.startDate.toISOString().split('T')[0] : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
+                            updateStartDate(entry.id, date);
+                          }}
+                          disabled={!entry.country}
+                          min={new Date().toISOString().split('T')[0]}
+                          max={entry.endDate ? entry.endDate.toISOString().split('T')[0] : undefined}
+                          className="w-full h-12 px-4 border-0 bg-white rounded-lg shadow-sm text-center font-normal text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={!entry.country ? "Select country first" : ""}
+                        />
+                        {!entry.startDate && entry.country && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-gray-400 text-sm">Start date</span>
                           </div>
-                        </PopoverContent>
-                      </Popover>
+                        )}
+                      </div>
                       {entry.activeColumn === "dates" && !entry.startDate && (
                         <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
                           {!entry.country ? "Select a country first" : "Select start date"}
@@ -712,37 +701,25 @@ export default function SchengenVisaCalculator() {
                     <div
                       className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
                     >
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-center text-center font-normal bg-white h-12 text-sm px-4 border-0 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={!entry.country || !entry.startDate}
-                          >
-                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">
-                              {!entry.country
-                                ? "Select country first"
-                                : !entry.startDate
-                                  ? "Select start date first"
-                                  : entry.endDate
-                                    ? format(entry.endDate, "dd MMM yyyy")
-                                    : "End date"}
-                            </span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
-                          <div className="p-6">
-                            <CalendarComponent
-                              mode="single"
-                              selected={entry.endDate || undefined}
-                              onSelect={(date) => updateEndDate(entry.id, date)}
-                              disabled={(date) => date < new Date() || (entry.startDate && date < entry.startDate)}
-                              className="border-0"
-                            />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={entry.endDate ? entry.endDate.toISOString().split('T')[0] : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
+                            updateEndDate(entry.id, date);
+                          }}
+                          disabled={!entry.country || !entry.startDate}
+                          min={entry.startDate ? entry.startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
+                          className="w-full h-12 px-4 border-0 bg-white rounded-lg shadow-sm text-center font-normal text-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={!entry.country ? "Select country first" : !entry.startDate ? "Select start date first" : ""}
+                        />
+                        {!entry.endDate && entry.startDate && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-gray-400 text-sm">End date</span>
                           </div>
-                        </PopoverContent>
-                      </Popover>
+                        )}
+                      </div>
                       {entry.activeColumn === "dates" && entry.startDate && !entry.endDate && (
                         <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
                           Select end date
