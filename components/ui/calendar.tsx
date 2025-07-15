@@ -17,7 +17,6 @@ function Calendar({
   return (
     <div 
       className={cn("calendar-airbnb-container p-6 bg-white rounded-2xl shadow-sm", className)}
-      data-nuclear-calendar="2025-01-15-22:30"
       style={{
         fontFamily: "'Inter', 'Helvetica Neue', 'Arial', sans-serif",
         fontSize: "16px",
