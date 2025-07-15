@@ -92,3 +92,90 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Aggressive Calendar Overrides - Force Airbnb Style */
+.calendar-airbnb-container .calendar-day-selected,
+.calendar-airbnb-container .rdp-day_selected,
+.calendar-airbnb-container [aria-selected="true"] {
+  background-color: #111827 !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 50% !important;
+  border: none !important;
+}
+
+.calendar-airbnb-container .calendar-day-selected:hover,
+.calendar-airbnb-container .rdp-day_selected:hover,
+.calendar-airbnb-container [aria-selected="true"]:hover {
+  background-color: #1f2937 !important;
+  color: white !important;
+}
+
+.calendar-airbnb-container .calendar-day-today,
+.calendar-airbnb-container .rdp-day_today,
+.calendar-airbnb-container [aria-current="date"] {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+  font-weight: 700 !important;
+  border: 2px solid #111827 !important;
+  border-radius: 50% !important;
+}
+
+.calendar-airbnb-container .calendar-day:hover:not(.calendar-day-selected):not(.calendar-day-disabled):not(.calendar-day-outside),
+.calendar-airbnb-container .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled):not(.rdp-day_outside) {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+  border-radius: 50% !important;
+}
+
+.calendar-airbnb-container .calendar-caption-label,
+.calendar-airbnb-container .rdp-caption_label {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+.calendar-airbnb-container .calendar-head-cell,
+.calendar-airbnb-container .rdp-head_cell {
+  color: #6b7280 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+
+.calendar-airbnb-container .calendar-day,
+.calendar-airbnb-container .rdp-day {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  border-radius: 50% !important;
+}
+
+.calendar-airbnb-container .calendar-nav-button,
+.calendar-airbnb-container .rdp-nav_button {
+  width: 3rem !important;
+  height: 3rem !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.calendar-airbnb-container .calendar-nav-button:hover,
+.calendar-airbnb-container .rdp-nav_button:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Force remove any conflicting styles */
+.calendar-airbnb-container * {
+  box-sizing: border-box !important;
+}
+
+.calendar-airbnb-container button {
+  border: none !important;
+  outline: none !important;
+}
+
+.calendar-airbnb-container button:focus {
+  outline: 2px solid #6b7280 !important;
+  outline-offset: 2px !important;
+}

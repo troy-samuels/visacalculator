@@ -8,7 +8,7 @@
   "trailingSlash": false,
   "env": {
     "FORCE_FRESH_DEPLOYMENT": "true",
-    "DEPLOYMENT_TIMESTAMP": "2025-07-15-20-00-CALENDAR-UPDATE"
+    "DEPLOYMENT_TIMESTAMP": "2025-07-15-20-15-DEEP-CLEAN-CALENDAR"
   },
   "headers": [
     {
