@@ -1,12 +1,18 @@
--- Script to set a user as admin
--- Replace 'your-email@example.com' with your actual email address
--- Run this in your Supabase SQL editor after deployment
+-- Script to set users as admin
+-- Run this in your Supabase SQL editor after creating the test accounts
 
+-- Set admin@example.com as admin
 UPDATE profiles 
 SET is_admin = true 
-WHERE email = 'your-email@example.com';
+WHERE email = 'admin@example.com';
 
 -- Verify the admin was set
-SELECT email, is_admin, created_at 
+SELECT email, first_name, last_name, is_admin, created_at 
 FROM profiles 
-WHERE is_admin = true; 
+WHERE email IN ('admin@example.com', 'test.user@example.com')
+ORDER BY email;
+
+-- If you need to set a different email as admin, replace 'your-email@example.com' below:
+-- UPDATE profiles 
+-- SET is_admin = true 
+-- WHERE email = 'your-email@example.com'; 

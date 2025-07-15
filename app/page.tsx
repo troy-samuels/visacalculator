@@ -534,7 +534,7 @@ export default function SchengenVisaCalculator() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <img 
-                src="/visa-calculator-logo.svg" 
+                src="/schengenvisacalculatorlogo.png" 
                 alt="Visa Calculator" 
                 className="h-8 w-auto"
               />
@@ -687,8 +687,8 @@ export default function SchengenVisaCalculator() {
                             </span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
-                          <div className="p-8">
+                        <PopoverContent className="w-auto max-w-[800px] p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
+                          <div className="p-6">
                             <CalendarComponent
                               mode="range"
                               selected={{
@@ -828,7 +828,7 @@ export default function SchengenVisaCalculator() {
               <div className="flex items-center">
                 <Link href="/">
                   <img 
-                    src="/visa-calculator-logo.svg" 
+                    src="/schengenvisacalculatorlogo.png" 
                     alt="Visa Calculator" 
                     className="h-10 w-auto"
                   />

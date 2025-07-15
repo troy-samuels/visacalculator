@@ -461,10 +461,17 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <Link href="/dashboard">
                 <img 
-                  src="/visa-calculator-logo.svg" 
+                  src="/schengenvisacalculatorlogo.png" 
                   alt="Visa Calculator" 
                   className="h-8 w-auto"
+                  style={{ display: 'block', visibility: 'visible', opacity: 1 }}
+                  onError={(e) => {
+                    console.error('Logo failed to load:', e);
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextSibling.style.display = 'block';
+                  }}
                 />
+                <span style={{ display: 'none', color: 'red', fontWeight: 'bold' }}>LOGO FAILED TO LOAD</span>
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -621,8 +628,8 @@ export default function DashboardPage() {
                             </span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
-                          <div className="p-8">
+                        <PopoverContent className="w-auto max-w-[800px] p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
+                          <div className="p-6">
                             <CalendarComponent
                               mode="range"
                               selected={{
@@ -751,7 +758,7 @@ export default function DashboardPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
               <Link href="/">
                 <img 
-                  src="/visa-calculator-logo.svg" 
+                  src="/schengenvisacalculatorlogo.png" 
                   alt="Schengen Visa Calculator" 
                   className="h-10 w-auto"
                 />
