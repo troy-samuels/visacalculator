@@ -668,7 +668,7 @@ export default function SchengenVisaCalculator() {
                       )}
                     </div>
 
-                    {/* Date Range */}
+                    {/* Start Date */}
                     <div
                       className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
                     >
@@ -683,68 +683,69 @@ export default function SchengenVisaCalculator() {
                             <span className="truncate">
                               {!entry.country
                                 ? "Select country first"
-                                : entry.startDate && entry.endDate
-                                  ? `${format(entry.startDate, "dd MMM yyyy")} - ${format(entry.endDate, "dd MMM yyyy")}`
-                                  : entry.startDate
-                                    ? `${format(entry.startDate, "dd MMM yyyy")} - End date`
-                                    : "Select dates"}
+                                : entry.startDate
+                                  ? format(entry.startDate, "dd MMM yyyy")
+                                  : "Start date"}
                             </span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto max-w-[800px] p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
+                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
                           <div className="p-6">
                             <CalendarComponent
-                              mode="range"
-                              selected={{
-                                from: entry.startDate || undefined,
-                                to: entry.endDate || undefined,
-                              }}
-                              onSelect={(range) => {
-                                updateStartDate(entry.id, range?.from);
-                                updateEndDate(entry.id, range?.to);
-                              }}
-                              numberOfMonths={2}
+                              mode="single"
+                              selected={entry.startDate || undefined}
+                              onSelect={(date) => updateStartDate(entry.id, date)}
+                              disabled={(date) => date < new Date() || (entry.endDate && date > entry.endDate)}
                               className="border-0"
                             />
-                            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
-                              <div className="flex items-center space-x-3">
-                                <div className="p-2.5 bg-gray-50 rounded-xl">
-                                  <Calendar className="h-4 w-4 text-gray-500" />
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  {entry.startDate && entry.endDate 
-                                    ? `${differenceInDays(entry.endDate, entry.startDate) + 1} nights`
-                                    : "Select dates"
-                                  }
-                                </div>
-                              </div>
-                              <div className="flex gap-3">
-                                <Button
-                                  variant="outline"
-                                  className="text-gray-600 hover:bg-gray-50 bg-white border-gray-200 hover:border-gray-300 transition-all duration-200"
-                                  onClick={() => {
-                                    updateStartDate(entry.id, undefined);
-                                    updateEndDate(entry.id, undefined);
-                                  }}
-                                >
-                                  Clear dates
-                                </Button>
-                                <Button 
-                                  className="bg-gray-900 hover:bg-gray-800 text-white border-0 shadow-sm transition-all duration-200"
-                                  onClick={() => {
-                                    // Close popover - this will be handled by the popover itself
-                                  }}
-                                >
-                                  Done
-                                </Button>
-                              </div>
-                            </div>
                           </div>
                         </PopoverContent>
                       </Popover>
-                      {entry.activeColumn === "dates" && (
+                      {entry.activeColumn === "dates" && !entry.startDate && (
                         <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
-                          {!entry.country ? "Select a country first" : "Select your travel dates"}
+                          {!entry.country ? "Select a country first" : "Select start date"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* End Date */}
+                    <div
+                      className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
+                    >
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-center text-center font-normal bg-white h-12 text-sm px-4 border-0 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!entry.country || !entry.startDate}
+                          >
+                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {!entry.country
+                                ? "Select country first"
+                                : !entry.startDate
+                                  ? "Select start date first"
+                                  : entry.endDate
+                                    ? format(entry.endDate, "dd MMM yyyy")
+                                    : "End date"}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0 overflow-hidden" align="start">
+                          <div className="p-6">
+                            <CalendarComponent
+                              mode="single"
+                              selected={entry.endDate || undefined}
+                              onSelect={(date) => updateEndDate(entry.id, date)}
+                              disabled={(date) => date < new Date() || (entry.startDate && date < entry.startDate)}
+                              className="border-0"
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                      {entry.activeColumn === "dates" && entry.startDate && !entry.endDate && (
+                        <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
+                          Select end date
                         </div>
                       )}
                     </div>
