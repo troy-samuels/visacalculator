@@ -6,46 +6,13 @@
   "outputDirectory": ".next",
   "cleanUrls": true,
   "trailingSlash": false,
-  "env": {
-    "FORCE_FRESH_DEPLOYMENT": "true",
-    "DEPLOYMENT_TIMESTAMP": "2025-07-15-22-40-ULTIMATE-CACHE-NUKE"
-  },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0"
-        },
-        {
-          "key": "Pragma", 
-          "value": "no-cache"
-        },
-        {
-          "key": "Expires",
-          "value": "0"
-        },
-        {
-          "key": "Surrogate-Control",
-          "value": "no-store"
-        },
-        {
-          "key": "X-Deployment-Timestamp",
-          "value": "ULTIMATE-CACHE-NUKE-2025-01-15-22:40"
-        },
-        {
-          "key": "Vary",
-          "value": "Accept-Encoding"
-        }
-      ]
-    },
-    {
-      "source": "/_next/static/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, max-age=0, s-maxage=0"
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
