@@ -1,1 +1,7 @@
-FORCE_FRESH_DEPLOYMENT_2025_07_12_21_40_CACHE_BUST_FIX_WEBSITE_ERRORS 
+ULTIMATE-CACHE-NUKE-2025-01-15-22:40
+This file forces a fresh Vercel deployment by changing content.
+All caches should be completely invalidated.
+Dynamic rendering enabled.
+Nuclear CSS selectors applied.
+No static generation.
+Edge cache purged. 
