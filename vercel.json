@@ -29,6 +29,10 @@
         {
           "key": "Surrogate-Control",
           "value": "no-store"
+        },
+        {
+          "key": "X-Deployment-Timestamp",
+          "value": "NUCLEAR-CACHE-BUST-2025-01-15-22:30"
         }
       ]
     },
