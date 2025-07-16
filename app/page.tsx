@@ -1,21 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, ChevronRight, Calendar } from "lucide-react"
+import { Plus, Calendar, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { differenceInDays, subDays, format } from "date-fns"
+import { format, differenceInDays, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import SignupModal from "@/components/signup-modal"
-import PrivacyNotice from "@/components/privacy-notice"
 import { useAuth } from "@/lib/hooks/useAuth"
-import { useAnalytics } from "@/lib/hooks/useAnalytics"
-import { createClient } from "@/lib/supabase/client"
-import { cn } from "@/lib/utils"
 
 interface VisaEntry {
   id: string
@@ -61,116 +56,9 @@ const schengenCountries = [
   { code: "CH", name: "Switzerland", flag: "🇨🇭" },
 ]
 
-// Animated Counter Component
-function AnimatedCounter({ value, duration = 500 }: { value: number; duration?: number }) {
-  const [displayValue, setDisplayValue] = useState(value)
-
-  useEffect(() => {
-    if (displayValue === value) return
-
-    const startValue = displayValue
-    const difference = value - startValue
-    const startTime = Date.now()
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
-      const currentValue = Math.round(startValue + difference * easeOutQuart)
-
-      setDisplayValue(currentValue)
-
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      }
-    }
-
-    requestAnimationFrame(animate)
-  }, [value, duration, displayValue])
-
-  return <span>{displayValue}</span>
-}
-
-// Progress Circle Component
-function ProgressCircle({ daysRemaining, size = 120 }: { daysRemaining: number; size?: number }) {
-  const [animatedProgress, setAnimatedProgress] = useState(0)
-  const maxDays = 90
-  const percentage = Math.max(0, Math.min(100, (daysRemaining / maxDays) * 100))
-
-  useEffect(() => {
-    const startProgress = animatedProgress
-    const targetProgress = percentage
-    const startTime = Date.now()
-    const duration = 800
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
-      const currentProgress = startProgress + (targetProgress - startProgress) * easeOutQuart
-
-      setAnimatedProgress(currentProgress)
-
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      }
-    }
-
-    requestAnimationFrame(animate)
-  }, [percentage, animatedProgress])
-
-  const radius = (size - 16) / 2
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (animatedProgress / 100) * circumference
-
-  const getColor = () => {
-    if (daysRemaining <= 0) return "#EF4444" // Red
-    if (daysRemaining <= 30) return "#F59E0B" // Amber
-    return "#10B981" // Green
-  }
-
-  return (
-    <div className="flex items-center justify-center">
-      <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="transform -rotate-90">
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="#E5E7EB"
-            strokeWidth="8"
-            fill="transparent"
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke={getColor()}
-            strokeWidth="8"
-            fill="transparent"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            className="transition-all duration-500 ease-out"
-          />
-        </svg>
-
-        {/* Center content */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className={`font-bold ${size > 100 ? "text-2xl" : "text-lg"}`} style={{ color: getColor() }}>
-            <AnimatedCounter value={daysRemaining} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function SchengenVisaCalculator() {
+export default function HomePage() {
+  const { user } = useAuth()
+  const router = useRouter()
   const [entries, setEntries] = useState<VisaEntry[]>([
     {
       id: "1",
@@ -183,114 +71,26 @@ export default function SchengenVisaCalculator() {
       activeColumn: "country",
     },
   ])
-  
-  const [showSignupModal, setShowSignupModal] = useState(false)
-  const [hasTriggeredSignup, setHasTriggeredSignup] = useState(false)
-  const { user, profile, loading: authLoading } = useAuth()
-  const { trackCalculation, trackDestinationSelected, trackDateSelected, trackPageView } = useAnalytics()
-  const supabase = createClient()
-  const router = useRouter()
 
-  // Track page view on component mount
-  useEffect(() => {
-    trackPageView()
-  }, [trackPageView])
-
-  // Redirect authenticated users to their dashboard
-  useEffect(() => {
-    if (user && !authLoading) {
-      router.push("/dashboard")
-    }
-  }, [user, authLoading, router])
-
-  // Load user's visa entries when authenticated
-  useEffect(() => {
-    if (user && !authLoading) {
-      loadUserEntries()
-    }
-  }, [user, authLoading])
-
-  const loadUserEntries = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("visa_entries")
-        .select("*")
-        .eq("user_id", user?.id)
-        .order("created_at", { ascending: true })
-
-      if (error) {
-        console.error("Error loading entries:", error)
-        return
-      }
-
-      if (data && data.length > 0) {
-        const loadedEntries = data.map((entry, index) => ({
-          id: entry.id,
-          country: entry.country_code,
-          startDate: new Date(entry.start_date),
-          endDate: new Date(entry.end_date),
-          days: entry.days,
-          daysInLast180: 0, // Will be recalculated
-          daysRemaining: 90, // Will be recalculated
-          activeColumn: "complete" as const,
-        }))
-
-        updateAllEntries(loadedEntries)
-      }
-    } catch (error) {
-      console.error("Error loading entries:", error)
-    }
-  }
-
-  const saveUserEntries = async (entriesToSave: VisaEntry[]) => {
-    if (!user) return
-
-    try {
-      // First, delete existing entries for this user
-      await supabase
-        .from("visa_entries")
-        .delete()
-        .eq("user_id", user.id)
-
-      // Then insert new entries
-      const validEntries = entriesToSave.filter(entry => 
-        entry.country && entry.startDate && entry.endDate
-      )
-
-      if (validEntries.length > 0) {
-        const { error } = await supabase
-          .from("visa_entries")
-          .insert(
-            validEntries.map(entry => ({
-              user_id: user.id,
-              country_code: entry.country,
-              start_date: entry.startDate!.toISOString().split('T')[0],
-              end_date: entry.endDate!.toISOString().split('T')[0],
-              notes: null,
-            }))
-          )
-
-        if (error) {
-          console.error("Error saving entries:", error)
-        }
-      }
-    } catch (error) {
-      console.error("Error saving entries:", error)
-    }
-  }
-
-  const calculateDaysInLast180 = (startDate: Date, endDate: Date) => {
+  const calculateDaysInLast180 = (startDate: Date, endDate: Date): number => {
     const today = new Date()
-    const last180Days = subDays(today, 180)
+    const date180DaysAgo = subDays(today, 180)
 
-    // Check if the trip overlaps with the last 180 days
-    const tripStart = startDate > last180Days ? startDate : last180Days
-    const tripEnd = endDate < today ? endDate : today
-
-    if (tripStart <= tripEnd) {
-      return differenceInDays(tripEnd, tripStart) + 1
+    // If the entire trip is before the 180-day window, no days count
+    if (endDate < date180DaysAgo) {
+      return 0
     }
-    return 0
+
+    // If the entire trip is in the future, no days count yet
+    if (startDate > today) {
+      return 0
+    }
+
+    // Calculate the overlap between the trip and the last 180 days
+    const overlapStart = startDate > date180DaysAgo ? startDate : date180DaysAgo
+    const overlapEnd = endDate < today ? endDate : today
+
+    return differenceInDays(overlapEnd, overlapStart) + 1
   }
 
   const updateAllEntries = (updatedEntries: VisaEntry[]) => {
@@ -326,39 +126,6 @@ export default function SchengenVisaCalculator() {
     })
 
     setEntries(entriesWithRemaining)
-
-    // Track calculation if we have complete data
-    const completedEntries = entriesWithRemaining.filter(entry => 
-      entry.country && entry.startDate && entry.endDate
-    )
-    
-    if (completedEntries.length > 0) {
-      const homeCountry = profile?.home_country || user?.user_metadata?.home_country
-      const totalDaysRemaining = Math.max(0, 90 - totalDaysInLast180)
-      
-      // Track the calculation with the most recent destination
-      const latestEntry = completedEntries[completedEntries.length - 1]
-      trackCalculation(latestEntry.country, homeCountry || '', totalDaysRemaining)
-    }
-
-    // Auto-save for authenticated users
-    if (user) {
-      saveUserEntries(entriesWithRemaining)
-    }
-
-    // Check if we should show signup modal
-    if (!user && !hasTriggeredSignup && entriesWithRemaining.length >= 2) {
-      // Check if second entry or any subsequent entry has dates entered
-      const entriesWithDates = entriesWithRemaining.slice(1); // Skip first entry
-      const hasEntryWithDates = entriesWithDates.some(entry => 
-        entry.startDate && entry.endDate
-      );
-      
-      if (hasEntryWithDates) {
-        setShowSignupModal(true)
-        setHasTriggeredSignup(true)
-      }
-    }
   }
 
   const addEntry = () => {
@@ -380,12 +147,6 @@ export default function SchengenVisaCalculator() {
       if (entry.id === id) {
         const updatedEntry = { ...entry, [field]: value }
 
-        // Track destination selection
-        if (field === "country" && value && value !== entry.country) {
-          const homeCountry = profile?.home_country || user?.user_metadata?.home_country
-          trackDestinationSelected(value, homeCountry || '')
-        }
-
         // Calculate days when both dates are selected
         if (field === "startDate" || field === "endDate") {
           if (updatedEntry.startDate && updatedEntry.endDate) {
@@ -401,22 +162,18 @@ export default function SchengenVisaCalculator() {
     updateAllEntries(updatedEntries)
   }
 
-  const updateDateRange = (id: string, range: DateRange | undefined) => {
+  const updateDateRange = (id: string, dateRange: DateRange | undefined) => {
     const updatedEntries = entries.map((entry) => {
       if (entry.id === id) {
         const updatedEntry = {
           ...entry,
-          startDate: range?.from || null,
-          endDate: range?.to || null,
+          startDate: dateRange?.from || null,
+          endDate: dateRange?.to || null,
         }
 
         // Calculate days when both dates are selected
         if (updatedEntry.startDate && updatedEntry.endDate) {
           updatedEntry.days = differenceInDays(updatedEntry.endDate, updatedEntry.startDate) + 1
-          
-          // Track date selection
-          const homeCountry = profile?.home_country || user?.user_metadata?.home_country
-          trackDateSelected(updatedEntry.country, updatedEntry.days, homeCountry || '')
         } else {
           updatedEntry.days = 0
         }
@@ -429,38 +186,24 @@ export default function SchengenVisaCalculator() {
     updateAllEntries(updatedEntries)
   }
 
-  const handleSignupSuccess = () => {
-    // Refresh auth state and load user entries
-    window.location.reload()
-  }
-
   const getColumnStyles = (entry: VisaEntry, columnType: "country" | "dates" | "results") => {
     const isActive =
       entry.activeColumn === columnType ||
       (columnType === "dates" && entry.activeColumn === "dates") ||
       (columnType === "results" && entry.activeColumn === "complete")
 
-    const isNext =
-      (entry.activeColumn === "country" && columnType === "dates") ||
-      (entry.activeColumn === "dates" && columnType === "results")
-
     const isCompleted =
-      (entry.activeColumn === "dates" && columnType === "country") ||
-      (entry.activeColumn === "complete" && (columnType === "country" || columnType === "dates"))
-
-    let styles = "transition-all duration-500 ease-out relative "
+      (columnType === "country" && entry.country) ||
+      (columnType === "dates" && entry.startDate && entry.endDate) ||
+      (columnType === "results" && entry.startDate && entry.endDate)
 
     if (isActive) {
-      styles += "z-50 scale-105 shadow-xl "
-    } else if (isNext) {
-      styles += "z-40 scale-100 shadow-lg opacity-90 "
+      return "bg-blue-50 border-blue-200"
     } else if (isCompleted) {
-      styles += "z-30 scale-95 shadow-md opacity-75 "
+      return "bg-green-50 border-green-200"
     } else {
-      styles += "z-10 scale-90 shadow-sm opacity-50 "
+      return "bg-gray-50 border-gray-200"
     }
-
-    return styles
   }
 
   const getColumnBorderStyles = (entry: VisaEntry, columnType: "country" | "dates" | "results") => {
@@ -469,73 +212,48 @@ export default function SchengenVisaCalculator() {
       (columnType === "dates" && entry.activeColumn === "dates") ||
       (columnType === "results" && entry.activeColumn === "complete")
 
-    const isNext =
-      (entry.activeColumn === "country" && columnType === "dates") ||
-      (entry.activeColumn === "dates" && columnType === "results")
+    return isActive ? "border-2" : "border"
+  }
 
-    const isCompleted =
-      (entry.activeColumn === "dates" && columnType === "country") ||
-      (entry.activeColumn === "complete" && (columnType === "country" || columnType === "dates"))
-
-    if (isActive) {
-      return "border-2 border-blue-500 bg-blue-50"
-    } else if (isNext) {
-      return "border-2 border-orange-300 bg-orange-50"
-    } else if (isCompleted) {
-      return "border-2 border-green-300 bg-green-50"
-    } else {
-      return "border border-gray-200 bg-gray-50"
+  const removeEntry = (id: string) => {
+    if (entries.length > 1) {
+      const updatedEntries = entries.filter((entry) => entry.id !== id)
+      updateAllEntries(updatedEntries)
     }
   }
 
-  const totalDays = entries.reduce((sum, entry) => sum + entry.days, 0)
   const totalDaysInLast180 = entries.reduce((sum, entry) => sum + entry.daysInLast180, 0)
   const totalDaysRemaining = Math.max(0, 90 - totalDaysInLast180)
 
-  // Cache-busting timestamp for force refresh
-  const deploymentId = "ENHANCED-CALENDAR-2025-01-15-23:58"
-  
   return (
-    <div 
-      className="min-h-screen font-['Onest',sans-serif]" 
-      style={{ backgroundColor: "#F4F2ED" }}
-      data-deployment={deploymentId}
-    >
-      <style jsx>{`
-        .blur-last-column {
-          filter: blur(4px);
-          transition: filter 0.3s ease;
-          pointer-events: none;
-        }
-        
-
-      `}</style>
-      
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="shadow-sm border-b border-gray-200" style={{ backgroundColor: "#F4F2ED" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <img 
-                src="/schengenvisacalculatorlogo.png" 
-                alt="Visa Calculator" 
-                className="h-8 w-auto"
-              />
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">🇪🇺</span>
+              </div>
+              <h1 className="text-xl font-semibold text-gray-900">Schengen Visa Calculator</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button className="bg-black hover:bg-gray-800 text-white transition-colors duration-200 px-8 py-2 rounded-full">
-                  Login
+              {user ? (
+                <Button onClick={() => router.push("/dashboard")} className="bg-blue-600 hover:bg-blue-700">
+                  Dashboard
                 </Button>
-              </Link>
-              <Link href="/signup">
-                <Button
-                  className="text-white transition-colors duration-200 px-8 py-2 rounded-full hover:opacity-90"
-                  style={{ backgroundColor: "#FA9937" }}
-                >
-                  Sign Up
-                </Button>
-              </Link>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button className="bg-blue-600 hover:bg-blue-700">Sign Up</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -544,17 +262,27 @@ export default function SchengenVisaCalculator() {
       {/* Hero Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Plan Smarter
-              <br />
-              Travel Easier
-            </h1>
-          </div>
-          <div>
-            <h2 className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Know Where You Can Go — Instantly See Visa Rules, Book Trips, and Travel Confidently.
-            </h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            Calculate Your Schengen Visa Days
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Track your 90-day stays within any 180-day period across Schengen countries
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div className="flex items-center justify-center space-x-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">{totalDaysInLast180}</div>
+                <div className="text-sm text-gray-600">Days Used</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-600">{totalDaysRemaining}</div>
+                <div className="text-sm text-gray-600">Days Remaining</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-600">90</div>
+                <div className="text-sm text-gray-600">Total Allowed</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -580,7 +308,7 @@ export default function SchengenVisaCalculator() {
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900 text-sm">Days of Stay in the last 180 days</h3>
               </div>
-              <div className={`text-center ${showSignupModal ? 'blur-last-column' : ''}`}>
+              <div className="text-center">
                 <h3 className="font-semibold text-gray-900">Days Remaining</h3>
               </div>
             </div>
@@ -681,7 +409,6 @@ export default function SchengenVisaCalculator() {
                               onSelect={(range) => updateDateRange(entry.id, range)}
                               numberOfMonths={2}
                               className="rounded-none border-0"
-                              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                               classNames={{
                                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                                 month: "space-y-4",
@@ -694,182 +421,118 @@ export default function SchengenVisaCalculator() {
                                 nav_button_next: "absolute right-0",
                                 table: "w-full border-collapse space-y-1",
                                 head_row: "flex mb-2",
-                                head_cell: "text-gray-600 rounded-md w-12 font-medium text-sm text-center",
+                                head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
                                 row: "flex w-full mt-2",
-                                cell: "text-center text-sm p-0 relative",
-                                day: "h-12 w-12 p-0 font-medium hover:bg-gray-100 rounded-lg transition-all duration-200 border-2 border-transparent",
+                                cell: "text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-lg transition-colors",
                                 day_range_start:
-                                  "!bg-slate-800 !text-white hover:!bg-slate-700 !border-slate-800 !rounded-lg !font-semibold shadow-md",
+                                  "day-range-start bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
                                 day_range_end:
-                                  "!bg-slate-800 !text-white hover:!bg-slate-700 !border-slate-800 !rounded-lg !font-semibold shadow-md",
+                                  "day-range-end bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
                                 day_selected:
-                                  "!bg-slate-800 !text-white hover:!bg-slate-700 !border-slate-800 !rounded-lg !font-semibold shadow-md",
-                                day_today: "bg-blue-100 text-blue-900 font-bold border-2 border-blue-300",
-                                day_outside: "text-gray-300 opacity-40",
-                                day_disabled: "text-gray-200 opacity-30 cursor-not-allowed",
+                                  "bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_today: "bg-gray-100 text-gray-900 font-semibold",
+                                day_outside: "text-gray-400 opacity-50",
+                                day_disabled: "text-gray-400 opacity-50",
                                 day_range_middle:
-                                  "!bg-slate-200 !text-slate-900 hover:!bg-slate-300 !border-slate-200",
+                                  "aria-selected:bg-slate-100 aria-selected:text-slate-900 hover:bg-slate-100",
                                 day_hidden: "invisible",
                               }}
                             />
-                            <div className="flex gap-3 mt-6 pt-4 border-t">
-                              <Button
-                                variant="outline"
-                                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
-                                onClick={() => {
-                                  updateDateRange(entry.id, undefined)
-                                }}
-                              >
-                                Clear
-                              </Button>
-                              <Button
-                                className="flex-1 bg-slate-800 hover:bg-slate-700 text-white"
-                                onClick={() => {
-                                  // Close popover - handled by popover component
-                                }}
-                              >
-                                Done
-                              </Button>
-                            </div>
                           </div>
                         </PopoverContent>
                       </Popover>
                       {entry.activeColumn === "dates" && (
                         <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
-                          {!entry.country ? "Select a country first" : "Select your travel dates"}
+                          Select your travel dates
                         </div>
                       )}
                     </div>
 
-                    {/* Results Columns */}
+                    {/* Days of Stay */}
                     <div
-                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 ${getColumnBorderStyles(entry, "results")}`}
+                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 text-center ${getColumnBorderStyles(entry, "results")}`}
                     >
-                      <div className="bg-white rounded-lg p-3 font-semibold text-base text-center border-0 shadow-sm h-12 flex items-center justify-center">
-                        {entry.days > 0 ? `${entry.days} days` : "—"}
+                      <div className="bg-white rounded-lg p-3 shadow-sm">
+                        <div className="text-2xl font-bold text-gray-900">{entry.days}</div>
+                        <div className="text-xs text-gray-600">
+                          {entry.days === 1 ? "day" : "days"}
+                        </div>
                       </div>
                     </div>
 
+                    {/* Days in Last 180 */}
                     <div
-                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 ${getColumnBorderStyles(entry, "results")}`}
+                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 text-center ${getColumnBorderStyles(entry, "results")}`}
                     >
-                      <div className="bg-white rounded-lg p-3 font-semibold text-base text-center border-0 shadow-sm h-12 flex items-center justify-center">
-                        {entry.daysInLast180 > 0 ? `${entry.daysInLast180} days` : "—"}
+                      <div className="bg-white rounded-lg p-3 shadow-sm">
+                        <div className="text-2xl font-bold text-blue-600">{entry.daysInLast180}</div>
+                        <div className="text-xs text-gray-600">
+                          {entry.daysInLast180 === 1 ? "day" : "days"}
+                        </div>
                       </div>
+                      {entry.activeColumn === "complete" && (
+                        <div className="text-xs text-green-600 mt-2 font-medium relative z-10">
+                          Calculation complete
+                        </div>
+                      )}
                     </div>
 
-                    {/* Days Remaining with Progress Circle - Apply blur when modal is open */}
-                    <div className={`${getColumnStyles(entry, "results")} rounded-lg p-2 ${showSignupModal ? 'blur-last-column' : ''}`}>
-                      <div className="flex items-center justify-center h-20">
-                        <ProgressCircle daysRemaining={totalDaysRemaining} size={80} />
+                    {/* Days Remaining */}
+                    <div
+                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 text-center ${getColumnBorderStyles(entry, "results")}`}
+                    >
+                      <div className="bg-white rounded-lg p-3 shadow-sm">
+                        <div className="text-2xl font-bold text-green-600">{entry.daysRemaining}</div>
+                        <div className="text-xs text-gray-600">
+                          {entry.daysRemaining === 1 ? "day" : "days"}
+                        </div>
                       </div>
+                      {entries.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeEntry(entry.id)}
+                          className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          Remove
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
 
-              {/* Add Row Button */}
+              {/* Add Entry Button */}
               <div className="flex justify-center pt-4">
                 <Button
                   onClick={addEntry}
                   variant="outline"
-                  className="flex items-center space-x-2 hover:bg-gray-50 transition-colors duration-200 bg-transparent rounded-full px-6"
+                  className="flex items-center space-x-2 px-6 py-3 bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="w-4 h-4" />
                   <span>Add Another Trip</span>
                 </Button>
               </div>
-
-              {/* Total Days */}
-              {totalDays > 0 && (
-                <div className="border-t pt-4 mt-6">
-                  <div className="text-center">
-                    <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg px-6 py-3">
-                      <span className="text-blue-900 font-semibold text-lg">
-                        Total Days in Last 180 Days: {totalDaysInLast180} / 90
-                      </span>
-                      <div className={`text-sm text-blue-700 mt-1 ${showSignupModal ? 'blur-last-column' : ''}`}>
-                        Days Remaining: <AnimatedCounter value={totalDaysRemaining} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Save Progress Section */}
-              {totalDays > 0 && (
-                <div className="border-t pt-6 mt-6">
-                  <div className="text-center">
-                    <div className="max-w-md mx-auto bg-gray-50 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Save Your Progress</h3>
-                      <Link href="/signup">
-                        <Button
-                          className="text-white px-8 py-3 rounded-full hover:opacity-90 font-medium"
-                          style={{ backgroundColor: "#FA9937" }}
-                        >
-                          Sign Up
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="text-gray-900 py-12" style={{ backgroundColor: "#F4F2ED" }}>
+      <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col space-y-8">
-            {/* Top section with logo and links */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
-              <div className="flex items-center">
-                <Link href="/">
-                  <img 
-                    src="/schengenvisacalculatorlogo.png" 
-                    alt="Visa Calculator" 
-                    className="h-10 w-auto"
-                  />
-                </Link>
-              </div>
-
-              {/* Legal Links */}
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
-                <a
-                  href="/legal-disclaimer"
-                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                >
-                  Legal Disclaimer
-                </a>
-                <a href="/privacy-policy" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Privacy Policy
-                </a>
-                <a
-                  href="/terms-and-conditions"
-                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                >
-                  Terms & Conditions
-                </a>
-              </div>
-            </div>
-
-            {/* Bottom section with copyright */}
-            <div className="border-t border-gray-300 pt-6">
-              <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-                <div className="text-sm text-gray-600">© 2024 Schengen Visa Calculator. All rights reserved.</div>
-                <div className="text-xs text-gray-500">
-                  This tool provides estimates only. Please consult official sources for accurate visa requirements.
-                </div>
-              </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-4">Schengen Visa Calculator</h3>
+            <p className="text-gray-400 mb-4">
+              Calculate your 90-day stays within any 180-day period for Schengen Area travel
+            </p>
+            <div className="text-sm text-gray-500">
+              © 2024 Schengen Visa Calculator. All rights reserved.
             </div>
           </div>
         </div>
       </footer>
-
-      {showSignupModal && <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} onSuccess={handleSignupSuccess} />}
-      <PrivacyNotice />
     </div>
   )
 }
