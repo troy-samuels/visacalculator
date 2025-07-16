@@ -439,6 +439,18 @@ export default function HomePage() {
                                 day_hidden: "invisible",
                               }}
                             />
+                            <div className="flex gap-3 mt-6 pt-4 border-t">
+                              <Button
+                                variant="outline"
+                                className="flex-1 border-slate-300 text-slate-700 hover:bg-gray-50 bg-transparent"
+                                onClick={() => {
+                                  updateDateRange(entry.id, undefined)
+                                }}
+                              >
+                                Clear
+                              </Button>
+                              <Button className="flex-1 bg-slate-800 hover:bg-slate-700 text-white">Done</Button>
+                            </div>
                           </div>
                         </PopoverContent>
                       </Popover>

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format, differenceInDays, subDays } from "date-fns"
+import type { DateRange } from "react-day-picker"
 import Link from "next/link"
 import { useAuth } from "@/lib/hooks/useAuth"
 import { createClient } from "@/lib/supabase/client"
@@ -335,6 +336,34 @@ export default function DashboardPage() {
     updateAllEntries(updatedEntries)
   }
 
+  const updateDateRange = (id: string, dateRange: DateRange | undefined) => {
+    const updatedEntries = entries.map((entry) => {
+      if (entry.id === id) {
+        const updatedEntry = {
+          ...entry,
+          startDate: dateRange?.from || null,
+          endDate: dateRange?.to || null,
+        }
+
+        // Calculate days when both dates are selected
+        if (updatedEntry.startDate && updatedEntry.endDate) {
+          updatedEntry.days = differenceInDays(updatedEntry.endDate, updatedEntry.startDate) + 1
+        } else {
+          updatedEntry.days = 0
+        }
+
+        // Auto-save when entry is complete
+        if (updatedEntry.country && updatedEntry.startDate && updatedEntry.endDate) {
+          saveEntry(updatedEntry)
+        }
+
+        return updatedEntry
+      }
+      return entry
+    })
+
+    updateAllEntries(updatedEntries)
+  }
 
 
   const handleProfileComplete = async (updatedProfile: Partial<Profile>) => {
@@ -578,105 +607,88 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-                    {/* Travel Dates */}
+                    {/* Date Range */}
                     <div
-                      className={`${getColumnStyles(entry, "dates")} rounded-xl p-5 ${getColumnBorderStyles(entry, "dates")} bg-white shadow-sm`}
+                      className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
                     >
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-800 mb-3">Start Date</label>
-                          <Popover>
-                            <PopoverTrigger asChild>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-center text-center font-normal bg-white h-12 text-sm px-4 border-0 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!entry.country}
+                          >
+                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {!entry.country
+                                ? "Select country first"
+                                : entry.startDate && entry.endDate
+                                  ? `${format(entry.startDate, "MMM dd")} - ${format(entry.endDate, "MMM dd")}`
+                                  : entry.startDate
+                                    ? `${format(entry.startDate, "MMM dd")} - End date`
+                                    : "Select dates"}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0" align="start">
+                          <div className="p-6">
+                            <CalendarComponent
+                              mode="range"
+                              selected={{
+                                from: entry.startDate || undefined,
+                                to: entry.endDate || undefined,
+                              }}
+                              onSelect={(range) => updateDateRange(entry.id, range)}
+                              numberOfMonths={2}
+                              className="rounded-none border-0"
+                              classNames={{
+                                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                month: "space-y-4",
+                                caption: "flex justify-center pt-1 relative items-center mb-4",
+                                caption_label: "text-lg font-semibold text-gray-900",
+                                nav: "space-x-1 flex items-center",
+                                nav_button:
+                                  "h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors",
+                                nav_button_previous: "absolute left-0",
+                                nav_button_next: "absolute right-0",
+                                table: "w-full border-collapse space-y-1",
+                                head_row: "flex mb-2",
+                                head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
+                                row: "flex w-full mt-2",
+                                cell: "text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-lg transition-colors",
+                                day_range_start:
+                                  "day-range-start bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_range_end:
+                                  "day-range-end bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_selected:
+                                  "bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_today: "bg-gray-100 text-gray-900 font-semibold",
+                                day_outside: "text-gray-400 opacity-50",
+                                day_disabled: "text-gray-400 opacity-50",
+                                day_range_middle:
+                                  "aria-selected:bg-slate-100 aria-selected:text-slate-900 hover:bg-slate-100",
+                                day_hidden: "invisible",
+                              }}
+                            />
+                            <div className="flex gap-3 mt-6 pt-4 border-t">
                               <Button
                                 variant="outline"
-                                className={cn(
-                                  "w-full justify-start font-medium text-left h-12 px-4 bg-white border border-gray-300 rounded-xl hover:border-gray-400 hover:shadow-sm transition-all duration-200",
-                                  !entry.startDate && "text-gray-500",
-                                  entry.startDate && "text-gray-900 border-gray-400"
-                                )}
-                                disabled={!entry.country}
-                              >
-                                <Calendar className="mr-3 h-4 w-4 flex-shrink-0 text-gray-600" />
-                                <span className="truncate text-base">
-                                  {!entry.country
-                                    ? "Select country first"
-                                    : entry.startDate
-                                      ? format(entry.startDate, "EEE, MMM d")
-                                      : "Add date"}
-                                </span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 border-0 shadow-xl rounded-2xl" align="start">
-                              <CalendarComponent
-                                mode="single"
-                                selected={entry.startDate || undefined}
-                                onSelect={(date) => updateEntry(entry.id, "startDate", date)}
-                                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-800 mb-3">End Date</label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start font-medium text-left h-12 px-4 bg-white border border-gray-300 rounded-xl hover:border-gray-400 hover:shadow-sm transition-all duration-200",
-                                  !entry.endDate && "text-gray-500",
-                                  entry.endDate && "text-gray-900 border-gray-400"
-                                )}
-                                disabled={!entry.country || !entry.startDate}
-                              >
-                                <Calendar className="mr-3 h-4 w-4 flex-shrink-0 text-gray-600" />
-                                <span className="truncate text-base">
-                                  {!entry.country
-                                    ? "Select country first"
-                                    : !entry.startDate
-                                      ? "Select start date first"
-                                      : entry.endDate
-                                        ? format(entry.endDate, "EEE, MMM d")
-                                        : "Add date"}
-                                </span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 border-0 shadow-xl rounded-2xl" align="start">
-                              <CalendarComponent
-                                mode="single"
-                                selected={entry.endDate || undefined}
-                                onSelect={(date) => updateEntry(entry.id, "endDate", date)}
-                                disabled={(date) => {
-                                  const today = new Date(new Date().setHours(0, 0, 0, 0))
-                                  const startDate = entry.startDate || today
-                                  return date < startDate
+                                className="flex-1 border-slate-300 text-slate-700 hover:bg-gray-50 bg-transparent"
+                                onClick={() => {
+                                  updateDateRange(entry.id, undefined)
                                 }}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        
-                        {/* Date Summary */}
-                        {entry.startDate && entry.endDate && (
-                          <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                            <div className="text-center">
-                              <div className="text-sm font-semibold text-gray-900">
-                                {format(entry.startDate, "MMM d")} → {format(entry.endDate, "MMM d, yyyy")}
-                              </div>
-                              <div className="text-xs text-gray-600 mt-1">
-                                {entry.days} {entry.days === 1 ? 'day' : 'days'} total
-                              </div>
+                              >
+                                Clear
+                              </Button>
+                              <Button className="flex-1 bg-slate-800 hover:bg-slate-700 text-white">Done</Button>
                             </div>
                           </div>
-                        )}
-                      </div>
-                      
+                        </PopoverContent>
+                      </Popover>
                       {entry.activeColumn === "dates" && (
-                        <div className="text-xs text-blue-600 mt-3 text-center font-medium relative z-10">
-                          {!entry.country ? "Select a country first" : "Choose your travel dates"}
+                        <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
+                          {!entry.country ? "Select a country first" : "Select your travel dates"}
                         </div>
                       )}
                     </div>
