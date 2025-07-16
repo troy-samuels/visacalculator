@@ -1,5 +1,9 @@
 "use client"
 
+// Force dynamic rendering to bypass cache
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { useState, useEffect } from "react"
 import { Plus, ChevronRight, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -492,8 +496,15 @@ export default function SchengenVisaCalculator() {
   const totalDaysInLast180 = entries.reduce((sum, entry) => sum + entry.daysInLast180, 0)
   const totalDaysRemaining = Math.max(0, 90 - totalDaysInLast180)
 
+  // Cache-busting timestamp for force refresh
+  const deploymentId = "ENHANCED-CALENDAR-2025-01-15-23:58"
+  
   return (
-    <div className="min-h-screen font-['Onest',sans-serif]" style={{ backgroundColor: "#F4F2ED" }}>
+    <div 
+      className="min-h-screen font-['Onest',sans-serif]" 
+      style={{ backgroundColor: "#F4F2ED" }}
+      data-deployment={deploymentId}
+    >
       <style jsx>{`
         .blur-last-column {
           filter: blur(4px);
