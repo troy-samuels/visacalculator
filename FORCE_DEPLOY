@@ -1,14 +1,17 @@
-ENHANCED-CALENDAR-DEPLOYMENT-2025-01-16-01:33:00
+FRESH-ENHANCED-CALENDAR-DEPLOYMENT-2025-01-16-01:37:30
 
-This file forces Vercel to rebuild the application with enhanced calendar features:
+🚀 COMPLETELY FRESH DEPLOYMENT FORCED 🚀
 
-✅ 48px calendar buttons for better clickability
-✅ Dark slate-800 background for selected dates
-✅ White text on selected dates for high contrast
-✅ Clear visual feedback for range selection
-✅ Enhanced hover states and transitions
-✅ Improved date selection visual indicators
+This deployment includes:
+✅ Enhanced calendar with 48px buttons
+✅ Dark slate-800 selected dates with white text
+✅ Clear visual feedback for date range selection  
+✅ Improved hover states and transitions
+✅ Box shadows and borders for better visibility
+✅ Light gray background for range middle dates
 
-Deployment ID: ENHANCED-CALENDAR-2025-01-16-01:33
-Cache Bust: FORCE-REBUILD-CALENDAR-VISUAL-FEEDBACK
-Timestamp: 1752625980000 
+NEW STATUS ENDPOINT: /api/status
+Removed old cache-bust endpoint to force fresh deployment
+Deployment ID: FRESH-ENHANCED-CALENDAR-2025-01-16-01:37
+Force Timestamp: 1752626250000
+Build Hash: ENHANCED-CALENDAR-VISUAL-FEEDBACK-v4 
