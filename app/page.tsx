@@ -1,14 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, ChevronRight } from "lucide-react"
+import { Plus, Calendar, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import DateRangePicker from "@/components/ui/date-range-picker"
-import { differenceInDays, subDays } from "date-fns"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { format, differenceInDays, subDays } from "date-fns"
+import type { DateRange } from "react-day-picker"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks/useAuth"
+import { AnimatedCounter } from "@/components/ui/animated-counter"
+import { ProgressCircle } from "@/components/ui/progress-circle"
 
 interface VisaEntry {
   id: string
@@ -160,13 +164,13 @@ export default function HomePage() {
     updateAllEntries(updatedEntries)
   }
 
-  const updateDateRange = (id: string, startDate: Date | null, endDate: Date | null) => {
+  const updateDateRange = (id: string, dateRange: DateRange | undefined) => {
     const updatedEntries = entries.map((entry) => {
       if (entry.id === id) {
         const updatedEntry = {
           ...entry,
-          startDate,
-          endDate,
+          startDate: dateRange?.from || null,
+          endDate: dateRange?.to || null,
         }
 
         // Calculate days when both dates are selected
@@ -220,37 +224,33 @@ export default function HomePage() {
     }
   }
 
+  const totalDays = entries.reduce((sum, entry) => sum + entry.days, 0)
   const totalDaysInLast180 = entries.reduce((sum, entry) => sum + entry.daysInLast180, 0)
   const totalDaysRemaining = Math.max(0, 90 - totalDaysInLast180)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">🇪🇺</span>
-              </div>
-              <h1 className="text-xl font-semibold text-gray-900">Schengen Visa Calculator</h1>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-gray-900">Schengen Visa Calculator</h1>
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
-                <Button onClick={() => router.push("/dashboard")} className="bg-blue-600 hover:bg-blue-700">
-                  Dashboard
-                </Button>
+                <Link href="/dashboard">
+                  <Button>Go to Dashboard</Button>
+                </Link>
               ) : (
-                <>
+                <div className="flex space-x-2">
                   <Link href="/login">
-                    <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-                      Sign In
-                    </Button>
+                    <Button variant="outline">Log In</Button>
                   </Link>
                   <Link href="/signup">
-                    <Button className="bg-blue-600 hover:bg-blue-700">Sign Up</Button>
+                    <Button>Sign Up</Button>
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -261,27 +261,11 @@ export default function HomePage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            Calculate Your Schengen Visa Days
+            Track Your Schengen Visa Days
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Track your 90-day stays within any 180-day period across Schengen countries
+            Calculate how many days you can still spend in the Schengen area within the 180-day period.
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-            <div className="flex items-center justify-center space-x-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">{totalDaysInLast180}</div>
-                <div className="text-sm text-gray-600">Days Used</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">{totalDaysRemaining}</div>
-                <div className="text-sm text-gray-600">Days Remaining</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-600">90</div>
-                <div className="text-sm text-gray-600">Total Allowed</div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -377,100 +361,214 @@ export default function HomePage() {
                     <div
                       className={`${getColumnStyles(entry, "dates")} rounded-lg p-4 ${getColumnBorderStyles(entry, "dates")}`}
                     >
-                      <DateRangePicker
-                        startDate={entry.startDate}
-                        endDate={entry.endDate}
-                        onDateChange={(startDate, endDate) => updateDateRange(entry.id, startDate, endDate)}
-                        disabled={!entry.country}
-                        placeholder={!entry.country ? "Select country first" : "Select dates"}
-                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-center text-center font-normal bg-white h-12 text-sm px-4 border-0 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!entry.country}
+                          >
+                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {!entry.country
+                                ? "Select country first"
+                                : entry.startDate && entry.endDate
+                                  ? `${format(entry.startDate, "MMM dd")} - ${format(entry.endDate, "MMM dd")}`
+                                  : entry.startDate
+                                    ? `${format(entry.startDate, "MMM dd")} - End date`
+                                    : "Select dates"}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-white rounded-2xl shadow-xl border-0" align="start">
+                          <div className="p-6">
+                            <CalendarComponent
+                              mode="range"
+                              selected={{
+                                from: entry.startDate || undefined,
+                                to: entry.endDate || undefined,
+                              }}
+                              onSelect={(range) => updateDateRange(entry.id, range)}
+                              numberOfMonths={2}
+                              className="rounded-none border-0"
+                              classNames={{
+                                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                month: "space-y-4",
+                                caption: "flex justify-center pt-1 relative items-center mb-4",
+                                caption_label: "text-lg font-semibold text-gray-900",
+                                nav: "space-x-1 flex items-center",
+                                nav_button:
+                                  "h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors",
+                                nav_button_previous: "absolute left-0",
+                                nav_button_next: "absolute right-0",
+                                table: "w-full border-collapse space-y-1",
+                                head_row: "flex mb-2",
+                                head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
+                                row: "flex w-full mt-2",
+                                cell: "text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-lg transition-colors",
+                                day_range_start:
+                                  "day-range-start bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_range_end:
+                                  "day-range-end bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_selected:
+                                  "bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                day_today: "bg-gray-100 text-gray-900 font-semibold",
+                                day_outside: "text-gray-400 opacity-50",
+                                day_disabled: "text-gray-400 opacity-50",
+                                day_range_middle:
+                                  "aria-selected:bg-slate-100 aria-selected:text-slate-900 hover:bg-slate-100",
+                                day_hidden: "invisible",
+                              }}
+                            />
+                            <div className="flex gap-3 mt-6 pt-4 border-t">
+                              <Button
+                                variant="outline"
+                                className="flex-1 border-slate-300 text-slate-700 hover:bg-gray-50 bg-transparent"
+                                onClick={() => {
+                                  updateDateRange(entry.id, undefined)
+                                }}
+                              >
+                                Clear
+                              </Button>
+                              <Button
+                                className="flex-1 bg-slate-800 hover:bg-slate-700 text-white"
+                                onClick={() => {
+                                  // Close popover - handled by the popover component
+                                }}
+                              >
+                                Done
+                              </Button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                       {entry.activeColumn === "dates" && (
                         <div className="text-xs text-blue-600 mt-2 text-center font-medium relative z-10">
-                          Select your travel dates
+                          {!entry.country ? "Select a country first" : "Select your travel dates"}
                         </div>
                       )}
                     </div>
 
-                    {/* Days of Stay */}
+                    {/* Results Columns */}
                     <div
-                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 text-center ${getColumnBorderStyles(entry, "results")}`}
+                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 ${getColumnBorderStyles(entry, "results")}`}
                     >
-                      <div className="bg-white rounded-lg p-3 shadow-sm">
-                        <div className="text-2xl font-bold text-gray-900">{entry.days}</div>
-                        <div className="text-xs text-gray-600">
-                          {entry.days === 1 ? "day" : "days"}
-                        </div>
+                      <div className="bg-white rounded-lg p-3 font-semibold text-base text-center border-0 shadow-sm h-12 flex items-center justify-center">
+                        {entry.days > 0 ? `${entry.days} days` : "—"}
                       </div>
                     </div>
 
-                    {/* Days in Last 180 */}
                     <div
-                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 text-center ${getColumnBorderStyles(entry, "results")}`}
+                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 ${getColumnBorderStyles(entry, "results")}`}
                     >
-                      <div className="bg-white rounded-lg p-3 shadow-sm">
-                        <div className="text-2xl font-bold text-blue-600">{entry.daysInLast180}</div>
-                        <div className="text-xs text-gray-600">
-                          {entry.daysInLast180 === 1 ? "day" : "days"}
-                        </div>
+                      <div className="bg-white rounded-lg p-3 font-semibold text-base text-center border-0 shadow-sm h-12 flex items-center justify-center">
+                        {entry.daysInLast180 > 0 ? `${entry.daysInLast180} days` : "—"}
                       </div>
-                      {entry.activeColumn === "complete" && (
-                        <div className="text-xs text-green-600 mt-2 font-medium relative z-10">
-                          Calculation complete
-                        </div>
-                      )}
                     </div>
 
-                    {/* Days Remaining */}
-                    <div
-                      className={`${getColumnStyles(entry, "results")} rounded-lg p-4 text-center ${getColumnBorderStyles(entry, "results")}`}
-                    >
-                      <div className="bg-white rounded-lg p-3 shadow-sm">
-                        <div className="text-2xl font-bold text-green-600">{entry.daysRemaining}</div>
-                        <div className="text-xs text-gray-600">
-                          {entry.daysRemaining === 1 ? "day" : "days"}
-                        </div>
+                    {/* Days Remaining with Progress Circle */}
+                    <div className={`${getColumnStyles(entry, "results")} rounded-lg p-2`}>
+                      <div className="flex items-center justify-center h-20">
+                        <ProgressCircle daysRemaining={totalDaysRemaining} size={80} />
                       </div>
-                      {entries.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeEntry(entry.id)}
-                          className="mt-2 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          Remove
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </div>
               ))}
 
-              {/* Add Entry Button */}
+              {/* Add Row Button */}
               <div className="flex justify-center pt-4">
                 <Button
                   onClick={addEntry}
                   variant="outline"
-                  className="flex items-center space-x-2 px-6 py-3 bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700"
+                  className="flex items-center space-x-2 hover:bg-gray-50 transition-colors duration-200 bg-transparent rounded-full px-6"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="h-4 w-4" />
                   <span>Add Another Trip</span>
                 </Button>
               </div>
+
+              {/* Total Days */}
+              {totalDays > 0 && (
+                <div className="border-t pt-4 mt-6">
+                  <div className="text-center">
+                    <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg px-6 py-3">
+                      <span className="text-blue-900 font-semibold text-lg">
+                        Total Days in Last 180 Days: {totalDaysInLast180} / 90
+                      </span>
+                      <div className="text-sm text-blue-700 mt-1">
+                        Days Remaining: <AnimatedCounter value={totalDaysRemaining} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Save Progress Section */}
+              {totalDays > 0 && (
+                <div className="border-t pt-6 mt-6">
+                  <div className="text-center">
+                    <div className="max-w-md mx-auto bg-gray-50 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Save Your Progress</h3>
+                      <Link href="/signup">
+                        <Button
+                          className="text-white px-8 py-3 rounded-full hover:opacity-90 font-medium"
+                          style={{ backgroundColor: "#FA9937" }}
+                        >
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="text-gray-900 py-12" style={{ backgroundColor: "#F4F2ED" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold mb-4">Schengen Visa Calculator</h3>
-            <p className="text-gray-400 mb-4">
-              Calculate your 90-day stays within any 180-day period for Schengen Area travel
-            </p>
-            <div className="text-sm text-gray-500">
-              © 2024 Schengen Visa Calculator. All rights reserved.
+          <div className="flex flex-col space-y-8">
+            {/* Top section with logo and links */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
+              <Button
+                variant="outline"
+                className="bg-gray-200 border-gray-300 text-gray-900 hover:bg-gray-300 rounded-full px-6"
+              >
+                Logo
+              </Button>
+
+              {/* Legal Links */}
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
+                <a
+                  href="/legal-disclaimer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                >
+                  Legal Disclaimer
+                </a>
+                <a href="/privacy-policy" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                  Privacy Policy
+                </a>
+                <a
+                  href="/terms-and-conditions"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                >
+                  Terms & Conditions
+                </a>
+              </div>
+            </div>
+
+            {/* Bottom section with copyright */}
+            <div className="border-t border-gray-300 pt-6">
+              <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div className="text-sm text-gray-600">© 2024 Schengen Visa Calculator. All rights reserved.</div>
+                <div className="text-xs text-gray-500">
+                  This tool provides estimates only. Please consult official sources for accurate visa requirements.
+                </div>
+              </div>
             </div>
           </div>
         </div>
