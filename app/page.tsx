@@ -687,21 +687,21 @@ export default function SchengenVisaCalculator() {
                                 nav_button_next: "absolute right-0",
                                 table: "w-full border-collapse space-y-1",
                                 head_row: "flex mb-2",
-                                head_cell: "text-gray-600 rounded-md w-10 font-medium text-sm text-center",
+                                head_cell: "text-gray-600 rounded-md w-12 font-medium text-sm text-center",
                                 row: "flex w-full mt-2",
-                                cell: "text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-lg transition-colors",
+                                cell: "text-center text-sm p-0 relative",
+                                day: "h-12 w-12 p-0 font-medium hover:bg-gray-100 rounded-lg transition-all duration-200 border-2 border-transparent",
                                 day_range_start:
-                                  "day-range-start bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                  "!bg-slate-800 !text-white hover:!bg-slate-700 !border-slate-800 !rounded-lg !font-semibold shadow-md",
                                 day_range_end:
-                                  "day-range-end bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
+                                  "!bg-slate-800 !text-white hover:!bg-slate-700 !border-slate-800 !rounded-lg !font-semibold shadow-md",
                                 day_selected:
-                                  "bg-slate-800 text-white hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white rounded-lg",
-                                day_today: "bg-gray-100 text-gray-900 font-semibold",
-                                day_outside: "text-gray-400 opacity-50",
-                                day_disabled: "text-gray-400 opacity-50",
+                                  "!bg-slate-800 !text-white hover:!bg-slate-700 !border-slate-800 !rounded-lg !font-semibold shadow-md",
+                                day_today: "bg-blue-100 text-blue-900 font-bold border-2 border-blue-300",
+                                day_outside: "text-gray-300 opacity-40",
+                                day_disabled: "text-gray-200 opacity-30 cursor-not-allowed",
                                 day_range_middle:
-                                  "aria-selected:bg-gray-100 aria-selected:text-gray-900 hover:bg-gray-100",
+                                  "!bg-slate-200 !text-slate-900 hover:!bg-slate-300 !border-slate-200",
                                 day_hidden: "invisible",
                               }}
                             />
