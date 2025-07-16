@@ -1,7 +1,14 @@
-ULTIMATE-CACHE-NUKE-2025-01-15-22:40
-This file forces a fresh Vercel deployment by changing content.
-All caches should be completely invalidated.
-Dynamic rendering enabled.
-Nuclear CSS selectors applied.
-No static generation.
-Edge cache purged. 
+ENHANCED-CALENDAR-DEPLOYMENT-2025-01-16-01:33:00
+
+This file forces Vercel to rebuild the application with enhanced calendar features:
+
+✅ 48px calendar buttons for better clickability
+✅ Dark slate-800 background for selected dates
+✅ White text on selected dates for high contrast
+✅ Clear visual feedback for range selection
+✅ Enhanced hover states and transitions
+✅ Improved date selection visual indicators
+
+Deployment ID: ENHANCED-CALENDAR-2025-01-16-01:33
+Cache Bust: FORCE-REBUILD-CALENDAR-VISUAL-FEEDBACK
+Timestamp: 1752625980000 
