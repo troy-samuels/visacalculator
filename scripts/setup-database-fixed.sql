@@ -1,6 +1,3 @@
--- Enable Row Level Security
-ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
-
 -- Create countries table
 CREATE TABLE IF NOT EXISTS countries (
   code VARCHAR(2) PRIMARY KEY,
@@ -83,7 +80,7 @@ CREATE TABLE IF NOT EXISTS trip_collections (
 ALTER TABLE visa_entries 
 ADD COLUMN IF NOT EXISTS trip_collection_id UUID REFERENCES trip_collections(id) ON DELETE SET NULL;
 
--- Enable Row Level Security on all tables
+-- Enable Row Level Security on our custom tables only
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE visa_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trip_collections ENABLE ROW LEVEL SECURITY;

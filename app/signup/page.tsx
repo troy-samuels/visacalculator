@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { X, Mail, Eye, EyeOff, ArrowLeft, Lock, User, Phone } from "lucide-react"
+import { X, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -24,8 +24,6 @@ const countryCodes = [
 export default function SignUpPage() {
   const [selectedCountryCode, setSelectedCountryCode] = useState("+1")
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [formData, setFormData] = useState({
     firstName: "",
@@ -117,40 +115,17 @@ export default function SignUpPage() {
     >
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-orange-200/20 to-yellow-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-orange-200/30 to-yellow-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Main Container */}
+      {/* Modal */}
       <div className="relative w-full max-w-md">
-        {/* Back to Home Button */}
-        <Link 
-          href="/" 
-          className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Back to Home</span>
-        </Link>
-
-        {/* Signup Card */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 relative overflow-hidden">
-          {/* Decorative gradient */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-blue-500"></div>
-          
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <img 
-              src="/schengenvisacalculatorlogo.png" 
-              alt="Schengen Visa Calculator" 
-              className="h-16 w-auto"
-            />
-          </div>
-
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Your Account</h1>
-            <p className="text-gray-600">Join thousands tracking their Schengen visa days</p>
-          </div>
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+          {/* Close button */}
+          <Link href="/" className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X className="w-5 h-5 text-gray-600" />
+          </Link>
 
           {/* Message display */}
           {message && (
